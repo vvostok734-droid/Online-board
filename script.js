@@ -23,6 +23,13 @@ let currentColor = '#000000';
 let currentLineWidth = 4;
 let isEraser = false;
 
+// ==========================================
+// --- ПЕРЕМЕННЫЕ ДЛЯ ВИДЕОСВЯЗИ (PeerJS) ---
+// ==========================================
+let peer = null;
+let localStream = null;
+let currentCall = null;
+
 document.addEventListener('DOMContentLoaded', () => {
   canvas = document.getElementById('paintBoard');
   if (canvas) {
@@ -62,7 +69,168 @@ document.addEventListener('DOMContentLoaded', () => {
     listenToBoardItems();
     listenToChat();
   }
+
+  // Инициализируем камеру и PeerJS при загрузке страницы
+  initVideoConference();
 });
+
+// ==========================================
+// --- ЛОГИКА ВИДЕО И ЗВУКА (PeerJS) ---
+// ==========================================
+
+async function initVideoConference() {
+  try {
+    // 1. Запрашиваем доступ к камере и микрофону
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    
+    const localVideo = document.getElementById('localVideo');
+    if (localVideo) {
+      localVideo.srcObject = localStream;
+    }
+
+    // 2. Инициализируем Peer (фиксированные ID для простоты связи Учитель <-> Ученик)
+    // Учитель всегда регистрируется как 'teacher-room', ученик — как случайный или 'student-room'
+    // Для универсальности: используем уникальный ID или общие роли через Firebase, 
+    // но здесь сделаем простую привязку: учитель ждет вызова как 'online-board-teacher', ученик звонит на него.
+    
+    // Определим ID в зависимости от роли (по умолчанию при входе считаем учеником, после авторизации переподключимся)
+    initializePeerConnection('student-' + Math.random().toString(36).substring(2, 7));
+
+  } catch (error) {
+    console.warn("Не удалось получить доступ к камере/микрофону:", error);
+    const placeholder = document.getElementById('videoPlaceholder');
+    if (placeholder) placeholder.innerText = 'Камера/микрофон недоступны';
+  }
+}
+
+function initializePeerConnection(peerId) {
+  if (peer) {
+    peer.destroy();
+  }
+
+  peer = new Peer(peerId, {
+    debug: 1
+  });
+
+  peer.on('open', (id) => {
+    console.log('PeerJS ID:', id);
+    // Сохраняем ID в Firebase, чтобы учитель и ученик знали, куда звонить
+    if (db) {
+      const roleKey = currentRole === 'teacher' ? 'teacherPeerId' : 'studentPeerId';
+      db.ref(`calls/${roleKey}`).set(id);
+    }
+  });
+
+  // Когда кто-то звонит нам
+  peer.on('call', (call) => {
+    currentCall = call;
+    call.answer(localStream); // Отвечаем своим потоком
+    
+    call.on('stream', (remoteStream) => {
+      const remoteVideo = document.getElementById('remoteVideo');
+      if (remoteVideo) {
+        remoteVideo.srcObject = remoteStream;
+      }
+      const placeholder = document.getElementById('videoPlaceholder');
+      if (placeholder) placeholder.style.display = 'none';
+    });
+
+    call.on('close', () => {
+      resetRemoteVideo();
+    });
+  });
+}
+
+// Кнопка ручного вызова (или переподключения)
+function startCall() {
+  if (!db) {
+    alert("База данных не подключена для поиска собеседника!");
+    return;
+  }
+
+  // Смотрим в базе ID собеседника: если мы учитель, ищем ученика, и наоборот
+  const targetKey = currentRole === 'teacher' ? 'studentPeerId' : 'teacherPeerId';
+
+  db.ref(`calls/${targetKey}`).once('value').then((snapshot) => {
+    const targetPeerId = snapshot.val();
+    if (!targetPeerId) {
+      alert("Собеседник еще не в сети или не подключил камеру!");
+      return;
+    }
+
+    if (!localStream) {
+      alert("Ваша камера не активна!");
+      return;
+    }
+
+    console.log("Звоним пользователю с ID:", targetPeerId);
+    const call = peer.call(targetPeerId, localStream);
+    currentCall = call;
+
+    call.on('stream', (remoteStream) => {
+      const remoteVideo = document.getElementById('remoteVideo');
+      if (remoteVideo) {
+        remoteVideo.srcObject = remoteStream;
+      }
+      const placeholder = document.getElementById('videoPlaceholder');
+      if (placeholder) placeholder.style.display = 'none';
+      alert("Соединение установлено!");
+    });
+
+    call.on('close', () => {
+      resetRemoteVideo();
+    });
+
+  }).catch((err) => {
+    alert("Ошибка соединения: " + err.message);
+  });
+}
+
+// Управление звуком (микрофоном)
+function toggleAudio() {
+  if (!localStream) return;
+  const audioTrack = localStream.getAudioTracks()[0];
+  if (audioTrack) {
+    audioTrack.enabled = !audioTrack.enabled;
+    const btn = document.getElementById('toggleAudioBtn');
+    if (audioTrack.enabled) {
+      btn.innerText = '🎙️ Вкл. звук';
+      btn.classList.remove('btn-off');
+    } else {
+      btn.innerText = '🔇 Выкл. звук';
+      btn.classList.add('btn-off');
+    }
+  }
+}
+
+// Управление видео (камерой)
+function toggleVideo() {
+  if (!localStream) return;
+  const videoTrack = localStream.getVideoTracks()[0];
+  if (videoTrack) {
+    videoTrack.enabled = !videoTrack.enabled;
+    const btn = document.getElementById('toggleVideoBtn');
+    if (videoTrack.enabled) {
+      btn.innerText = '📷 Вкл. видео';
+      btn.classList.remove('btn-off');
+    } else {
+      btn.innerText = '📷 Выкл. видео';
+      btn.classList.add('btn-off');
+    }
+  }
+}
+
+function resetRemoteVideo() {
+  const remoteVideo = document.getElementById('remoteVideo');
+  if (remoteVideo) remoteVideo.srcObject = null;
+  const placeholder = document.getElementById('videoPlaceholder');
+  if (placeholder) placeholder.style.display = 'block';
+  currentCall = null;
+}
+
+// ==========================================
+// --- РИСОВАНИЕ НА ХОЛСТЕ ---
+// ==========================================
 
 function resizeCanvas() {
   const container = document.getElementById('canvas-container');
@@ -156,7 +324,7 @@ function handleBoardImageUpload(e) {
 }
 
 // ==========================================
-// --- ОТПРАВКА, ОТОБРАЖЕНИЕ И ЧТЕНИЕ ЧАТА ---
+// --- ЧАТ И СООБЩЕНИЯ ---
 // ==========================================
 
 function sendChatMessage() {
@@ -181,9 +349,6 @@ function handleChatFileUpload(e) {
 
   if (file.type.startsWith('image/')) {
     const reader = new FileReader();
-    reader.onerror = function() {
-      alert("Ошибка при чтении файла");
-    };
     reader.onload = function(event) {
       compressImage(event.target.result, 300, 0.5, function(compressedUrl) {
         const msg = {
@@ -204,17 +369,13 @@ function handleChatFileUpload(e) {
     };
     sendChatPayload(msg);
   }
-
   e.target.value = '';
 }
 
 function sendChatPayload(msg) {
   if (db) {
     try {
-      db.ref('chat/messages').push(msg).catch(function(err) {
-        console.warn("Firebase отклонил отправку:", err);
-        alert("Ошибка при отправке в чат: " + err.message);
-      });
+      db.ref('chat/messages').push(msg);
     } catch (e) {
       console.warn("Ошибка Firebase:", e);
     }
@@ -240,11 +401,9 @@ function addChatMessageToDOM(msg, msgId = null) {
                   <strong style="color:#89b4fa;">${msg.sender}:</strong> <span>${msg.text}</span>
                 </div>`;
   
-  // Кнопка удаления для сообщений/файлов из Firebase
   if (msgId) {
-    html += `<button onclick="deleteChatMessage('${msgId}')" title="Удалить" style="background:none; border:none; color:#f38ba8; cursor:pointer; font-size:14px; padding:0 0 0 8px; opacity:0.7;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑</button>`;
+    html += `<button onclick="deleteChatMessage('${msgId}')" title="Удалить" style="background:none; border:none; color:#f38ba8; cursor:pointer; font-size:14px; padding:0 0 0 8px; opacity:0.7;">🗑</button>`;
   }
-  
   html += `</div>`;
   
   if (msg.isImage && msg.fileUrl) {
@@ -256,13 +415,10 @@ function addChatMessageToDOM(msg, msgId = null) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Функция удаления сообщения или файла из Firebase
 function deleteChatMessage(msgId) {
   if (confirm("Удалить это сообщение/файл из чата?")) {
     if (db) {
-      db.ref(`chat/messages/${msgId}`).remove().catch((err) => {
-        alert("Ошибка при удалении: " + err.message);
-      });
+      db.ref(`chat/messages/${msgId}`).remove();
     }
   }
 }
@@ -324,7 +480,6 @@ function addItemToBoardDOM(item) {
   listContainer.appendChild(elem);
 }
 
-// Быстрое сжатие изображений
 function compressImage(src, maxWidth, quality, callback) {
   const img = new Image();
   img.onload = () => {
@@ -343,7 +498,7 @@ function compressImage(src, maxWidth, quality, callback) {
 }
 
 // ==========================================
-// --- ВХОД, РОЛИ И АВТОРИЗАЦИЯ УЧЕНИКОВ ---
+// --- АВТОРИЗАЦИЯ И РОЛИ ---
 // ==========================================
 
 function loginWithPin() {
@@ -364,34 +519,35 @@ function loginWithPin() {
     return;
   }
 
-  // 1. Проверка PIN учителя (20140110, 01102014 или 01201410)
+  // 1. Проверка PIN учителя
   if (pin === '20140110' || pin === '01102014' || pin === '01201410') {
     currentRole = 'teacher';
     currentUserName = 'Учитель';
     const teacherSec = document.getElementById('teacherSection');
     if (teacherSec) teacherSec.style.display = 'block';
     document.getElementById('auth-overlay').style.display = 'none';
+    
+    // Перерегистрируем PeerID как учитель
+    initializePeerConnection('teacher-room-id');
     return;
   }
 
-  // 2. Проверка подключения к базе данных
-  if (!db || firebaseConfig.databaseURL.includes('YOUR_DATABASE_NAME')) {
+  // 2. Проверка ученика в базе
+  if (!db) {
     if (errorElement) {
       errorElement.style.display = 'block';
-      errorElement.innerText = 'Ошибка: Проверь databaseURL в начале script.js!';
+      errorElement.innerText = 'Ошибка: База данных недоступна!';
     }
     return;
   }
 
-  // 3. Поиск ученика по PIN в Firebase Realtime Database
   db.ref('students').once('value').then((snapshot) => {
     const students = snapshot.val();
     let foundStudent = null;
 
     if (students) {
       Object.keys(students).forEach((key) => {
-        const studentPin = String(students[key].pin || '').trim();
-        if (studentPin === pin) {
+        if (String(students[key].pin || '').trim() === pin) {
           foundStudent = students[key];
         }
       });
@@ -403,6 +559,9 @@ function loginWithPin() {
       const teacherSec = document.getElementById('teacherSection');
       if (teacherSec) teacherSec.style.display = 'none';
       document.getElementById('auth-overlay').style.display = 'none';
+      
+      // Перерегистрируем PeerID как ученик
+      initializePeerConnection('student-' + foundStudent.name.toLowerCase().replace(/\s+/g, '-'));
     } else {
       if (errorElement) {
         errorElement.style.display = 'block';
@@ -410,7 +569,6 @@ function loginWithPin() {
       }
     }
   }).catch((err) => {
-    console.error("Ошибка авторизации:", err);
     if (errorElement) {
       errorElement.style.display = 'block';
       errorElement.innerText = 'Ошибка базы данных: ' + err.message;
@@ -425,7 +583,7 @@ function logout() {
 }
 
 // ==========================================
-// --- ПАНЕЛЬ УПРАВЛЕНИЯ УЧЕНИКАМИ ---
+// --- АДМИН-ПАНЕЛЬ УЧЕНИКОВ ---
 // ==========================================
 
 function showAdminModal() {
@@ -441,13 +599,8 @@ function closeAdminModal() {
   if (modal) modal.style.display = 'none';
 }
 
-// Сохранение до 5 учеников одновременно
 function saveBatchStudents() {
-  if (!db) {
-    alert("База данных недоступна");
-    return;
-  }
-
+  if (!db) return;
   const nameInputs = document.querySelectorAll('.new-st-name');
   const pinInputs = document.querySelectorAll('.new-st-pin');
   
@@ -460,11 +613,7 @@ function saveBatchStudents() {
 
     if (name && pin) {
       const newKey = db.ref('students').push().key;
-      updates['students/' + newKey] = {
-        name: name,
-        pin: pin,
-        createdAt: Date.now()
-      };
+      updates['students/' + newKey] = { name: name, pin: pin, createdAt: Date.now() };
       addedCount++;
     }
   });
@@ -475,24 +624,15 @@ function saveBatchStudents() {
   }
 
   db.ref().update(updates).then(() => {
-    // Очистка полей ввода
     nameInputs.forEach(i => i.value = '');
     pinInputs.forEach(i => i.value = '');
     alert(`Успешно добавлено учеников: ${addedCount}`);
-  }).catch((err) => {
-    alert("Ошибка при сохранении: " + err.message);
   });
 }
 
-// Загрузка списка учеников в модальное окно
 function loadAdminStudentsList() {
   const listContainer = document.getElementById('adminStudentsList');
-  if (!listContainer) return;
-
-  if (!db) {
-    listContainer.innerHTML = '<p style="color:#f38ba8;">База данных не подключена</p>';
-    return;
-  }
+  if (!listContainer || !db) return;
 
   db.ref('students').on('value', (snapshot) => {
     const students = snapshot.val();
@@ -507,7 +647,6 @@ function loadAdminStudentsList() {
       const st = students[id];
       const row = document.createElement('div');
       row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:#181825; padding:8px 12px; margin-bottom:6px; border-radius:6px;';
-      
       row.innerHTML = `
         <div style="flex:1;">
           <strong style="color:#cdd6f4;">${st.name}</strong>
@@ -523,35 +662,16 @@ function loadAdminStudentsList() {
   });
 }
 
-// Функция смены пароля/PIN ученика
 function changeStudentPin(studentId, name, currentPin) {
   const newPin = prompt(`Введите новый PIN/пароль для ученика "${name}":`, currentPin);
-  
-  if (newPin !== null) {
-    const trimmedPin = newPin.trim();
-    if (!trimmedPin) {
-      alert("PIN-код не может быть пустым!");
-      return;
-    }
-
-    if (db) {
-      db.ref(`students/${studentId}`).update({
-        pin: trimmedPin
-      }).then(() => {
-        alert("Пароль успешно изменен!");
-      }).catch((err) => {
-        alert("Ошибка при обновлении: " + err.message);
-      });
-    }
+  if (newPin && db) {
+    db.ref(`students/${studentId}`).update({ pin: newPin.trim() }).then(() => alert("Пароль изменен!"));
   }
 }
 
-// Функция удаления ученика
 function deleteStudent(studentId, name) {
-  if (confirm(`Удалить ученика "${name}"?`)) {
-    if (db) {
-      db.ref(`students/${studentId}`).remove();
-    }
+  if (confirm(`Удалить ученика "${name}"?`) && db) {
+    db.ref(`students/${studentId}`).remove();
   }
 }
 
@@ -583,9 +703,7 @@ function listenToBoardItems() {
       listContainer.innerHTML = '';
       const items = snapshot.val();
       if (items) {
-        Object.keys(items).forEach((key) => {
-          addItemToBoardDOM(items[key]);
-        });
+        Object.keys(items).forEach((key) => addItemToBoardDOM(items[key]));
       }
     });
   } catch(e){}
@@ -599,9 +717,7 @@ function listenToChat() {
       chatMessages.innerHTML = '';
       const messages = snapshot.val();
       if (messages) {
-        Object.keys(messages).forEach((key) => {
-          addChatMessageToDOM(messages[key], key);
-        });
+        Object.keys(messages).forEach((key) => addChatMessageToDOM(messages[key], key));
       }
     });
   } catch(e){}
