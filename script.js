@@ -1,4 +1,5 @@
-// --- ИНИЦИАЛИЗАЦИЯ FIREBASE ---
+
+  // --- ИНИЦИАЛИЗАЦИЯ FIREBASE ---
 const firebaseConfig = {
   databaseURL: "https://online-board-5ad8c-default-rtdb.firebaseio.com/"
 };
@@ -245,11 +246,14 @@ if (canvas) {
   canvas.addEventListener('touchend', stopDrawing);
 }
 
-// --- РАБОТА С КАРТОЧКАМИ НА ДОСКЕ ---
+// --- РАБОТА С КАРТОЧКАМИ НА ДОСКЕ (С ПЕРЕМЕЩЕНИЕМ) ---
 function sendTextToBoard(text, imageUrl = null) {
   if (!roomRef) return;
   const cardId = 'card_' + Date.now();
-  const cardData = {};
+  const cardData = {
+    x: 20 + Math.random() * 40, // Начальная позиция X
+    y: 20 + Math.random() * 40  // Начальная позиция Y
+  };
   if (text) cardData.text = text;
   if (imageUrl) cardData.imageUrl = imageUrl;
   
@@ -273,9 +277,17 @@ function renderBoardCards(cardsObj) {
     div.className = 'board-word-card';
     div.id = cardId;
     
+    // Позиционирование абсолютом для перемещения
+    div.style.position = 'absolute';
+    div.style.left = (card.x || 20) + 'px';
+    div.style.top = (card.y || 20) + 'px';
+    div.style.cursor = 'move';
+    div.style.userSelect = 'none';
+    div.style.touchAction = 'none';
+    
     let contentHtml = '';
     if (card.imageUrl) {
-      contentHtml += `<img src="${card.imageUrl}" style="max-width:100%; border-radius:4px; margin-bottom:4px; display:block;">`;
+      contentHtml += `<img src="${card.imageUrl}" style="max-width:180px; border-radius:4px; margin-bottom:4px; display:block; pointer-events:none;">`;
     }
     if (card.text) {
       const safeText = card.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -287,12 +299,70 @@ function renderBoardCards(cardsObj) {
 
     div.innerHTML = `
       ${contentHtml}
-      <div class="word-actions">
+      <div class="word-actions" style="margin-top:4px;">
         ${speakBtnHtml}
         <button class="btn-delete" onclick="deleteCardFromBoard('${cardId}')" style="cursor:pointer; padding:2px 6px;" title="Удалить">✕</button>
       </div>
     `;
+
+    // Подключаем перетаскивание к созданной карточке
+    makeCardDraggable(div, cardId);
+
     container.appendChild(div);
+  }
+}
+
+// Функция для свободного перетаскивания элементов по доске
+function makeCardDraggable(elmnt, cardId) {
+  let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+  elmnt.onmousedown = dragMouseDown;
+  elmnt.ontouchstart = dragMouseDown;
+
+  function dragMouseDown(e) {
+    // Не перетаскивать, если нажали на кнопку внутри карточки
+    if (e.target.tagName.toLowerCase() === 'button') return;
+    
+    e.preventDefault();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    pos3 = clientX;
+    pos4 = clientY;
+
+    document.onmouseup = closeDragElement;
+    document.onmousemove = elementDrag;
+    document.ontouchend = closeDragElement;
+    document.ontouchmove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e.preventDefault();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    pos1 = pos3 - clientX;
+    pos2 = pos4 - clientY;
+    pos3 = clientX;
+    pos4 = clientY;
+
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+  }
+
+  function closeDragElement() {
+    document.onmouseup = null;
+    document.onmousemove = null;
+    document.ontouchend = null;
+    document.ontouchmove = null;
+
+    // Сохраняем итоговое положение в Firebase
+    if (roomRef) {
+      roomRef.child(`cards/${cardId}`).update({
+        x: parseInt(elmnt.style.left),
+        y: parseInt(elmnt.style.top)
+      });
+    }
   }
 }
 
@@ -307,19 +377,15 @@ function handleChatFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
 
-  // 1. Обработка изображений (JPEG, PNG и т.д.)
   if (file.type.startsWith('image/')) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      // Сжимаем картинку с мобильного телефона перед отправкой
       compressImage(e.target.result, 800, 0.7, (compressedDataUrl) => {
         addMediaToChat(compressedDataUrl, 'image');
       });
     };
     reader.readAsDataURL(file);
-  } 
-  // 2. Обработка текстовых файлов
-  else if (file.type.startsWith('text/')) {
+  } else if (file.type.startsWith('text/')) {
     const reader = new FileReader();
     reader.onload = (e) => {
       const input = document.getElementById('chatInput');
@@ -330,10 +396,9 @@ function handleChatFileUpload(event) {
     alert('Пожалуйста, выберите изображение или текстовый файл.');
   }
 
-  event.target.value = ''; // Сброс инпута
+  event.target.value = '';
 }
 
-// Функция сжатия изображения для мобильных устройств
 function compressImage(base64Str, maxWidth, quality, callback) {
   const img = new Image();
   img.src = base64Str;
@@ -595,7 +660,7 @@ function addQuizInputRow() {
   row.style.gap = '6px';
   row.innerHTML = `
     <input type="text" class="quiz-item-input" placeholder="Слово или выражение..." style="flex:1; padding:6px; border-radius:4px; border:1px solid #45475a; background:#181825; color:#cdd6f4;">
-    <button onclick="this.parentElement.remove()" style="background:#f38ba8; color:#11111b; border:none; border-radius:4px; cursor:pointer; padding:0 8px;">✕</button>
+    <button onclick="this.parentElement.remove()" style="background:#f38ba8; color:#11111b; border:none; border-radius:4px; cursor:padding:0 8px;">✕</button>
   `;
   container.appendChild(row);
 }
@@ -608,3 +673,8 @@ function sendQuizToBoard() {
   });
   closeExerciseModal();
 }
+
+
+
+
+        
