@@ -1,6 +1,6 @@
 // Конфигурация Firebase
 const firebaseConfig = {
-  databaseURL: "https://online-board-5ad8c-default-rtdb.firebaseio.com"// <-- Вставь сюда реальный URL своей базы
+  databaseURL: "https://online-board-5ad8c-default-rtdb.firebaseio.com/" // <-- Твой URL базы
 };
 
 let db = null;
@@ -155,7 +155,9 @@ function handleBoardImageUpload(e) {
   e.target.value = '';
 }
 
-// --- ОТПРАВКА И ЧТЕНИЕ ЧАТА ---
+// ==========================================
+// --- ОТПРАВКА, ОТОБРАЖЕНИЕ И ЧТЕНИЕ ЧАТА ---
+// ==========================================
 
 function sendChatMessage() {
   const input = document.getElementById('chatInput');
@@ -207,20 +209,21 @@ function handleChatFileUpload(e) {
 }
 
 function sendChatPayload(msg) {
-  addChatMessageToDOM(msg);
-
   if (db) {
     try {
       db.ref('chat/messages').push(msg).catch(function(err) {
         console.warn("Firebase отклонил отправку:", err);
+        alert("Ошибка при отправке в чат: " + err.message);
       });
     } catch (e) {
       console.warn("Ошибка Firebase:", e);
     }
+  } else {
+    addChatMessageToDOM(msg);
   }
 }
 
-function addChatMessageToDOM(msg) {
+function addChatMessageToDOM(msg, msgId = null) {
   const chatMessages = document.getElementById('chatMessages');
   if (!chatMessages) return;
   
@@ -232,15 +235,36 @@ function addChatMessageToDOM(msg) {
   div.style.borderRadius = '8px';
   div.style.wordBreak = 'break-word';
   
-  let html = `<strong style="color:#89b4fa;">${msg.sender}:</strong> <span>${msg.text}</span>`;
+  let html = `<div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div style="flex:1;">
+                  <strong style="color:#89b4fa;">${msg.sender}:</strong> <span>${msg.text}</span>
+                </div>`;
+  
+  // Кнопка удаления для сообщений/файлов из Firebase
+  if (msgId) {
+    html += `<button onclick="deleteChatMessage('${msgId}')" title="Удалить" style="background:none; border:none; color:#f38ba8; cursor:pointer; font-size:14px; padding:0 0 0 8px; opacity:0.7;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑</button>`;
+  }
+  
+  html += `</div>`;
   
   if (msg.isImage && msg.fileUrl) {
-    html += `<br><img src="${msg.fileUrl}" style="max-width:100%; border-radius:6px; margin-top:6px; display:block;">`;
+    html += `<img src="${msg.fileUrl}" style="max-width:100%; border-radius:6px; margin-top:6px; display:block;">`;
   }
   
   div.innerHTML = html;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Функция удаления сообщения или файла из Firebase
+function deleteChatMessage(msgId) {
+  if (confirm("Удалить это сообщение/файл из чата?")) {
+    if (db) {
+      db.ref(`chat/messages/${msgId}`).remove().catch((err) => {
+        alert("Ошибка при удалении: " + err.message);
+      });
+    }
+  }
 }
 
 // Ввод текста на доску
@@ -350,7 +374,7 @@ function loginWithPin() {
     return;
   }
 
-  // 2. Проверка подключения к базы данных
+  // 2. Проверка подключения к базе данных
   if (!db || firebaseConfig.databaseURL.includes('YOUR_DATABASE_NAME')) {
     if (errorElement) {
       errorElement.style.display = 'block';
@@ -576,7 +600,7 @@ function listenToChat() {
       const messages = snapshot.val();
       if (messages) {
         Object.keys(messages).forEach((key) => {
-          addChatMessageToDOM(messages[key]);
+          addChatMessageToDOM(messages[key], key);
         });
       }
     });
