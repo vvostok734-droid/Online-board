@@ -18,6 +18,7 @@ try {
 let canvas, ctx;
 let isDrawing = false;
 let currentRole = 'student';
+let currentUserName = 'Ученик';
 let currentColor = '#000000';
 let currentLineWidth = 4;
 let isEraser = false;
@@ -162,7 +163,7 @@ function sendChatMessage() {
   const text = input.value.trim();
   if (text !== '') {
     const msg = {
-      sender: currentRole === 'teacher' ? 'Учитель' : 'Ученик',
+      sender: currentRole === 'teacher' ? 'Учитель' : currentUserName,
       text: text
     };
     sendChatPayload(msg);
@@ -170,12 +171,11 @@ function sendChatMessage() {
   }
 }
 
-// ОБНОВЛЕННАЯ НАДЕЖНАЯ СKРЕПКА
 function handleChatFileUpload(e) {
   const file = e.target.files && e.target.files[0];
   if (!file) return;
 
-  const senderName = currentRole === 'teacher' ? 'Учитель' : 'Ученик';
+  const senderName = currentRole === 'teacher' ? 'Учитель' : currentUserName;
 
   if (file.type.startsWith('image/')) {
     const reader = new FileReader();
@@ -183,7 +183,6 @@ function handleChatFileUpload(e) {
       alert("Ошибка при чтении файла");
     };
     reader.onload = function(event) {
-      // Оптимизированное сжатие: 300px, качество 0.5
       compressImage(event.target.result, 300, 0.5, function(compressedUrl) {
         const msg = {
           sender: senderName,
@@ -196,7 +195,6 @@ function handleChatFileUpload(e) {
     };
     reader.readAsDataURL(file);
   } else {
-    // Обычный документ
     const msg = {
       sender: senderName,
       text: `📎 Файл: ${file.name} (${Math.round(file.size / 1024)} KB)`,
@@ -208,7 +206,6 @@ function handleChatFileUpload(e) {
   e.target.value = '';
 }
 
-// Отправка сообщений (авто-отрисовка + сохранение)
 function sendChatPayload(msg) {
   addChatMessageToDOM(msg);
 
@@ -321,25 +318,74 @@ function compressImage(src, maxWidth, quality, callback) {
   img.src = src;
 }
 
-// Вход и роли
+// ==========================================
+// --- ВХОД, РОЛИ И АВТОРИЗАЦИЯ УЧЕНИКОВ ---
+// ==========================================
+
 function loginWithPin() {
   const pinInput = document.getElementById('authPinInput');
   const pin = pinInput ? pinInput.value.trim() : '';
   const errorElement = document.getElementById('authError');
 
-  if (pin === '1234') {
+  if (errorElement) errorElement.style.display = 'none';
+
+  if (!pin) {
+    if (errorElement) {
+      errorElement.style.display = 'block';
+      errorElement.innerText = 'Введите PIN-код';
+    }
+    return;
+  }
+
+  // 1. Проверка PIN учителя (основной 20140110 или резервный 1234)
+  if (pin === '20140110' || pin === '01102014') {
     currentRole = 'teacher';
+    currentUserName = 'Учитель';
     const teacherSec = document.getElementById('teacherSection');
     if (teacherSec) teacherSec.style.display = 'block';
     document.getElementById('auth-overlay').style.display = 'none';
-  } else if (pin !== '') {
+    return;
+  }
+
+  // 2. Поиск ученика по PIN в Firebase
+  if (db) {
+    db.ref('students').once('value').then((snapshot) => {
+      const students = snapshot.val();
+      let foundStudent = null;
+
+      if (students) {
+        Object.keys(students).forEach((key) => {
+          if (students[key].pin === pin) {
+            foundStudent = students[key];
+          }
+        });
+      }
+
+      if (foundStudent) {
+        currentRole = 'student';
+        currentUserName = foundStudent.name || 'Ученик';
+        const teacherSec = document.getElementById('teacherSection');
+        if (teacherSec) teacherSec.style.display = 'none';
+        document.getElementById('auth-overlay').style.display = 'none';
+      } else {
+        if (errorElement) {
+          errorElement.style.display = 'block';
+          errorElement.innerText = 'Неверный PIN-код!';
+        }
+      }
+    }).catch(() => {
+      if (errorElement) {
+        errorElement.style.display = 'block';
+        errorElement.innerText = 'Ошибка сети. Попробуйте еще раз.';
+      }
+    });
+  } else {
+    // Режим работы без базы (автономный)
     currentRole = 'student';
+    currentUserName = 'Ученик';
     const teacherSec = document.getElementById('teacherSection');
     if (teacherSec) teacherSec.style.display = 'none';
     document.getElementById('auth-overlay').style.display = 'none';
-  } else if (errorElement) {
-    errorElement.style.display = 'block';
-    errorElement.innerText = 'Введите PIN-код';
   }
 }
 
@@ -348,11 +394,141 @@ function logout() {
   document.getElementById('authPinInput').value = '';
 }
 
-function showAdminModal() { 
-  alert('Пароли учеников: \n Ученик: 0000'); 
+// ==========================================
+// --- ПАНЕЛЬ УПРАВЛЕНИЯ УЧЕНИКАМИ ---
+// ==========================================
+
+function showAdminModal() {
+  const modal = document.getElementById('admin-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    loadAdminStudentsList();
+  }
 }
 
-// Слушатели Firebase
+function closeAdminModal() {
+  const modal = document.getElementById('admin-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+// Сохранение до 5 учеников одновременно
+function saveBatchStudents() {
+  if (!db) {
+    alert("База данных недоступна");
+    return;
+  }
+
+  const nameInputs = document.querySelectorAll('.new-st-name');
+  const pinInputs = document.querySelectorAll('.new-st-pin');
+  
+  let addedCount = 0;
+  const updates = {};
+
+  nameInputs.forEach((input, index) => {
+    const name = input.value.trim();
+    const pin = pinInputs[index].value.trim();
+
+    if (name && pin) {
+      const newKey = db.ref('students').push().key;
+      updates['students/' + newKey] = {
+        name: name,
+        pin: pin,
+        createdAt: Date.now()
+      };
+      addedCount++;
+    }
+  });
+
+  if (addedCount === 0) {
+    alert("Заполните имя и PIN хотя бы для одного ученика!");
+    return;
+  }
+
+  db.ref().update(updates).then(() => {
+    // Очистка полей ввода
+    nameInputs.forEach(i => i.value = '');
+    pinInputs.forEach(i => i.value = '');
+    alert(`Успешно добавлено учеников: ${addedCount}`);
+  }).catch((err) => {
+    alert("Ошибка при сохранении: " + err.message);
+  });
+}
+
+// Загрузка списка учеников в модальное окно
+function loadAdminStudentsList() {
+  const listContainer = document.getElementById('adminStudentsList');
+  if (!listContainer) return;
+
+  if (!db) {
+    listContainer.innerHTML = '<p style="color:#f38ba8;">База данных не подключена</p>';
+    return;
+  }
+
+  db.ref('students').on('value', (snapshot) => {
+    const students = snapshot.val();
+    listContainer.innerHTML = '';
+
+    if (!students) {
+      listContainer.innerHTML = '<p style="color:#a6adc8;">Список учеников пуст</p>';
+      return;
+    }
+
+    Object.keys(students).forEach((id) => {
+      const st = students[id];
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex; justify-space-between; align-items:center; background:#181825; padding:8px 12px; margin-bottom:6px; border-radius:6px;';
+      
+      row.innerHTML = `
+        <div style="flex:1;">
+          <strong style="color:#cdd6f4;">${st.name}</strong>
+          <span style="color:#a6adc8; font-size:13px; margin-left:10px;">PIN: <b style="color:#a6e3a1;">${st.pin}</b></span>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button type="button" onclick="changeStudentPin('${id}', '${st.name}', '${st.pin}')" style="background:#89b4fa; color:#11111b; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">🔑 Сменить PIN</button>
+          <button type="button" onclick="deleteStudent('${id}', '${st.name}')" style="background:#f38ba8; color:#11111b; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">🗑</button>
+        </div>
+      `;
+      listContainer.appendChild(row);
+    });
+  });
+}
+
+// Функция смены пароля/PIN ученика
+function changeStudentPin(studentId, name, currentPin) {
+  const newPin = prompt(`Введите новый PIN/пароль для ученика "${name}":`, currentPin);
+  
+  if (newPin !== null) {
+    const trimmedPin = newPin.trim();
+    if (!trimmedPin) {
+      alert("PIN-код не может быть пустым!");
+      return;
+    }
+
+    if (db) {
+      db.ref(`students/${studentId}`).update({
+        pin: trimmedPin
+      }).then(() => {
+        alert("Пароль успешно изменен!");
+      }).catch((err) => {
+        alert("Ошибка при обновлении: " + err.message);
+      });
+    }
+  }
+}
+
+// Функция удаления ученика
+function deleteStudent(studentId, name) {
+  if (confirm(`Удалить ученика "${name}"?`)) {
+    if (db) {
+      db.ref(`students/${studentId}`).remove();
+    }
+  }
+}
+
+// ==========================================
+// --- СЛУШАТЕЛИ FIREBASE ---
+// ==========================================
+
 function listenToCanvas() {
   try {
     db.ref('board/canvas').on('value', (snapshot) => {
