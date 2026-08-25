@@ -6,85 +6,84 @@
   <title>Учебная Доска</title>
   <link rel="stylesheet" href="style.css">
   
-  <!-- Подключение Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
-  <!-- ОКНО ВВОДА ПАРОЛЯ ПРИ ВХОДЕ -->
-  <div id="auth-overlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#11111b; display:flex; justify-content:center; align-items:center; z-index:9999;">
-    <div style="background:#1e1e2e; padding:25px; border-radius:12px; border:1px solid #89b4fa; box-shadow: 0 8px 24px rgba(0,0,0,0.6); text-align:center; max-width:320px; width:90%;">
-      <h2 style="color:#89b4fa; margin-top:0;">🎓 Вход на урок</h2>
-      <p style="color:#cdd6f4; font-size:14px; margin-bottom:15px;">Введите ваш PIN-код доступа:</p>
-      <input type="password" id="authPinInput" placeholder="••••" style="width:100%; padding:10px; font-size:20px; text-align:center; border-radius:6px; border:1px solid #45475a; background:#181825; color:#cdd6f4; box-sizing:border-box; margin-bottom:15px; letter-spacing:4px;">
-      <button onclick="loginWithPin()" style="width:100%; padding:10px; background:#a6e3a1; color:#11111b; border:none; border-radius:6px; font-weight:bold; font-size:16px; cursor:pointer;">Войти</button>
-      <div id="authError" style="color:#f38ba8; margin-top:10px; font-size:13px; display:none;"></div>
+  <!-- ВХОД -->
+  <div id="auth-overlay">
+    <div class="auth-box">
+      <h2>🎓 Вход на урок</h2>
+      <p>Введите ваш PIN-код доступа:</p>
+      <input type="password" id="authPinInput" placeholder="••••">
+      <button type="button" onclick="loginWithPin()">Войти</button>
+      <div id="authError"></div>
     </div>
   </div>
 
-  <!-- ВЕРХНЯЯ ПАНЕЛЬ С КНОПКАМИ И ИНСТРУМЕНТАМИ -->
+  <!-- МОДАЛКА ТЕКСТА -->
+  <div id="text-modal" style="display:none;">
+    <div class="modal-box">
+      <h3 style="color:#cba6f7; margin-bottom:10px;">📄 Текст на доску</h3>
+      <textarea id="bigTextInput" rows="4" placeholder="Введите ваш текст..." style="width:100%; padding:10px; border-radius:6px; background:#181825; color:#cdd6f4; border:1px solid #45475a; resize:none; margin-bottom:12px; font-size:16px;"></textarea>
+      <div style="display:flex; gap:10px;">
+        <button type="button" onclick="confirmBigText()" style="flex:1; padding:10px; background:#a6e3a1; color:#11111b; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Добавить</button>
+        <button type="button" onclick="closeBigTextModal()" style="flex:1; padding:10px; background:#f38ba8; color:#11111b; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
   <div id="top-bar">
-    <!-- Рисование -->
     <div class="top-section">
-      <button onclick="setPen()">✏️ Кисть</button>
-      <button onclick="setEraser()">🧹 Стерка</button>
+      <button type="button" onclick="setPen()">✏️ Кисть</button>
+      <button type="button" onclick="setEraser()">🧹 Стерка</button>
       <input type="color" id="colorPicker" value="#000000">
       <input type="range" id="lineWidth" min="1" max="20" value="4">
     </div>
 
-    <!-- Загрузка на доску -->
     <div class="top-section">
-      <button onclick="document.getElementById('boardImageInput').click()" style="background:#89b4fa; color:#11111b;">🖼 Картинка</button>
-      <input type="file" id="boardImageInput" accept="image/*" style="display:none;">
+      <label for="boardImageInput" style="background:#89b4fa; color:#11111b; padding:6px 12px; border-radius:6px; font-size:14px; cursor:pointer; font-weight:bold;">🖼 Картинка</label>
+      <input type="file" id="boardImageInput" accept="image/*" style="display:none;" onchange="handleBoardImageUpload(event)">
     </div>
 
-    <!-- Документ / Рассказ сверху -->
     <div class="top-section">
-      <button onclick="showBigTextModal()" style="background:#cba6f7; color:#11111b; font-weight:bold;">📄 Написать текст</button>
+      <button type="button" onclick="showBigTextModal()" style="background:#cba6f7; color:#11111b; font-weight:bold;">📄 Написать текст</button>
     </div>
 
-    <!-- Тест / Конструктор слов -->
-    <div class="top-section">
-      <button onclick="showExerciseModal('quiz')" style="background:#f9e2af; color:#11111b; font-weight:bold;">📝 Тест</button>
-    </div>
-
-    <!-- Админка учителя (скрыта для учеников) -->
     <div class="top-section" id="teacherSection" style="display:none;">
-      <button onclick="showAdminModal()" style="background:#b4befe; color:#11111b; font-weight:bold;">👑 Пароли учеников</button>
+      <button type="button" onclick="showAdminModal()" style="background:#b4befe; color:#11111b; font-weight:bold;">👑 Пароли учеников</button>
     </div>
 
-    <!-- Очистка -->
     <div class="top-section">
-      <button onclick="clearCanvas()" style="background:#f38ba8; color:#11111b;">🗑 Очистить</button>
-      <button onclick="logout()" style="background:#45475a; color:#cdd6f4; margin-left:5px;">Выход</button>
+      <button type="button" onclick="clearCanvas()" style="background:#f38ba8; color:#11111b;">🗑 Очистить</button>
+      <button type="button" onclick="logout()" style="background:#45475a; color:#cdd6f4; margin-left:5px;">Выход</button>
     </div>
   </div>
 
-  <!-- НИЖНЯЯ ОБЛАСТЬ: ДОСКА И ЧАТ СПРАВА -->
+  <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
   <div id="main-container">
-    
-    <!-- Доска -->
     <div id="canvas-container">
       <div id="board-word-list"></div>
-      <div id="exercise-overlay" class="hidden"></div>
       <canvas id="paintBoard"></canvas>
     </div>
 
-    <!-- ЧАТ СПРАВА -->
+    <!-- ЧАТ С ПРЯМЫМИ ОБРАБОТЧИКАМИ -->
     <div id="side-panel">
-      <div class="side-column" id="chat-column">
-        <h4 id="panelTitle">Панель ввода</h4>
+      <div class="side-column">
+        <h4 id="panelTitle">Чат урока</h4>
         <div id="chatMessages"></div>
         <div class="chat-input-area">
-          <input type="text" id="chatInput" placeholder="Введите текст...">
-          <input type="file" id="chatFileInput" style="display:none;">
-          <button onclick="document.getElementById('chatFileInput').click()" style="background:#89b4fa; color:#11111b;" title="Прикрепить файл">📎</button>
-          <button onclick="sendTextToBoardFromInput()" style="background:#a6e3a1; color:#11111b; font-weight:bold;">Текст</button>
+          <input type="text" id="chatInput" placeholder="Сообщение..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+          
+          <label for="chatFileInput" class="chat-attach-btn" title="Прикрепить файл">📎</label>
+          <input type="file" id="chatFileInput" onchange="handleChatFileUpload(event)">
+          
+          <button type="button" class="chat-send-btn" onclick="sendChatMessage()">Отправить</button>
         </div>
       </div>
     </div>
-
   </div>
 
   <script src="script.js"></script>
