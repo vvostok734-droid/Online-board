@@ -1,5 +1,4 @@
-
-  // --- ИНИЦИАЛИЗАЦИЯ FIREBASE ---
+// --- ИНИЦИАЛИЗАЦИЯ FIREBASE ---
 const firebaseConfig = {
   databaseURL: "https://online-board-5ad8c-default-rtdb.firebaseio.com/"
 };
@@ -35,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function loginWithPin() {
   const pin = document.getElementById('authPinInput').value.trim();
   const errorDiv = document.getElementById('authError');
-  errorDiv.style.display = 'none';
+  if (errorDiv) errorDiv.style.display = 'none';
 
   if (!pin) return;
 
@@ -63,7 +62,7 @@ function loginWithPin() {
       currentRole = 'pupil';
       currentPupilId = foundUserKey;
       startSession();
-    } else {
+    } else if (errorDiv) {
       errorDiv.innerText = 'Неверный PIN-код!';
       errorDiv.style.display = 'block';
     }
@@ -71,15 +70,17 @@ function loginWithPin() {
 }
 
 function startSession() {
-  document.getElementById('auth-overlay').style.display = 'none';
+  const authOverlay = document.getElementById('auth-overlay');
+  if (authOverlay) authOverlay.style.display = 'none';
   
   const teacherSec = document.getElementById('teacherSection');
+  const panelTitle = document.getElementById('panelTitle');
   if (currentRole === 'teacher') {
     if (teacherSec) teacherSec.style.display = 'inline-block';
-    document.getElementById('panelTitle').innerText = `Урок (${currentPupilId})`;
+    if (panelTitle) panelTitle.innerText = `Урок (${currentPupilId})`;
   } else {
     if (teacherSec) teacherSec.style.display = 'none';
-    document.getElementById('panelTitle').innerText = `Панель урока`;
+    if (panelTitle) panelTitle.innerText = `Панель урока`;
   }
 
   initBoardSync();
@@ -87,8 +88,10 @@ function startSession() {
 
 function logout() {
   if (roomRef) roomRef.off();
-  document.getElementById('auth-overlay').style.display = 'flex';
-  document.getElementById('authPinInput').value = '';
+  const authOverlay = document.getElementById('auth-overlay');
+  if (authOverlay) authOverlay.style.display = 'flex';
+  const pinInput = document.getElementById('authPinInput');
+  if (pinInput) pinInput.value = '';
 }
 
 // --- СИНХРОНИЗАЦИЯ ДОСКИ С FIREBASE ---
@@ -118,11 +121,12 @@ function initBoardSync() {
     renderBoardCards(cards);
   });
 
-  // Следим не изменил ли учитель пароль прямо сейчас
+  // Следим, не изменил ли учитель пароль
   if (currentRole === 'pupil') {
     db.ref(`users/${currentPupilId}/pin`).on('value', (snapshot) => {
-      const currentInputPin = document.getElementById('authPinInput').value.trim();
-      if (snapshot.val() !== currentInputPin) {
+      const pinInput = document.getElementById('authPinInput');
+      const currentInputPin = pinInput ? pinInput.value.trim() : '';
+      if (snapshot.val() && snapshot.val() !== currentInputPin) {
         alert('Доступ был изменен учителем.');
         logout();
       }
@@ -249,10 +253,10 @@ if (canvas) {
 // --- РАБОТА С КАРТОЧКАМИ НА ДОСКЕ (С ПЕРЕМЕЩЕНИЕМ) ---
 function sendTextToBoard(text, imageUrl = null) {
   if (!roomRef) return;
-  const cardId = 'card_' + Date.now();
+  const cardId = 'card_' + Date.now() + Math.floor(Math.random() * 100);
   const cardData = {
-    x: 20 + Math.random() * 40, // Начальная позиция X
-    y: 20 + Math.random() * 40  // Начальная позиция Y
+    x: Math.floor(20 + Math.random() * 50),
+    y: Math.floor(20 + Math.random() * 50)
   };
   if (text) cardData.text = text;
   if (imageUrl) cardData.imageUrl = imageUrl;
@@ -262,12 +266,19 @@ function sendTextToBoard(text, imageUrl = null) {
 
 function renderBoardCards(cardsObj) {
   let container = document.getElementById('board-word-list');
-  if (!container && canvasContainer) {
+  const parentContainer = canvasContainer || document.body;
+  
+  if (!container) {
     container = document.createElement('div');
     container.id = 'board-word-list';
-    canvasContainer.appendChild(container);
+    container.style.position = 'absolute';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.pointerEvents = 'none';
+    parentContainer.appendChild(container);
   }
-  if (!container) return;
 
   container.innerHTML = '';
 
@@ -277,42 +288,45 @@ function renderBoardCards(cardsObj) {
     div.className = 'board-word-card';
     div.id = cardId;
     
-    // Позиционирование абсолютом для перемещения
     div.style.position = 'absolute';
     div.style.left = (card.x || 20) + 'px';
     div.style.top = (card.y || 20) + 'px';
     div.style.cursor = 'move';
     div.style.userSelect = 'none';
     div.style.touchAction = 'none';
+    div.style.pointerEvents = 'auto';
+    div.style.background = '#181825';
+    div.style.border = '1px solid #45475a';
+    div.style.borderRadius = '6px';
+    div.style.padding = '8px';
+    div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+    div.style.zIndex = '10';
     
     let contentHtml = '';
     if (card.imageUrl) {
-      contentHtml += `<img src="${card.imageUrl}" style="max-width:180px; border-radius:4px; margin-bottom:4px; display:block; pointer-events:none;">`;
+      contentHtml += `<img src="${card.imageUrl}" style="max-width:180px; max-height:180px; border-radius:4px; margin-bottom:4px; display:block; pointer-events:none;">`;
     }
     if (card.text) {
       const safeText = card.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      contentHtml += `<div style="white-space: pre-wrap; word-break: break-word;">${safeText}</div>`;
+      contentHtml += `<div style="white-space: pre-wrap; word-break: break-word; color:#cdd6f4;">${safeText}</div>`;
       div.setAttribute('data-text', card.text);
     }
 
-    const speakBtnHtml = card.text ? `<button onclick="speakWord(this.parentElement.parentElement.getAttribute('data-text'))" style="cursor:pointer; padding:2px 4px;" title="Озвучить">🔊</button>` : '';
+    const speakBtnHtml = card.text ? `<button onclick="speakWord(this.parentElement.parentElement.getAttribute('data-text'))" style="cursor:pointer; padding:2px 4px; background:#45475a; color:#cdd6f4; border:none; border-radius:3px;" title="Озвучить">🔊</button>` : '';
 
     div.innerHTML = `
       ${contentHtml}
-      <div class="word-actions" style="margin-top:4px;">
+      <div class="word-actions" style="margin-top:4px; display:flex; gap:4px; justify-content:flex-end;">
         ${speakBtnHtml}
-        <button class="btn-delete" onclick="deleteCardFromBoard('${cardId}')" style="cursor:pointer; padding:2px 6px;" title="Удалить">✕</button>
+        <button onclick="deleteCardFromBoard('${cardId}')" style="cursor:pointer; padding:2px 6px; background:#f38ba8; color:#11111b; border:none; border-radius:3px; font-weight:bold;" title="Удалить">✕</button>
       </div>
     `;
 
-    // Подключаем перетаскивание к созданной карточке
     makeCardDraggable(div, cardId);
-
     container.appendChild(div);
   }
 }
 
-// Функция для свободного перетаскивания элементов по доске
 function makeCardDraggable(elmnt, cardId) {
   let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
@@ -320,10 +334,8 @@ function makeCardDraggable(elmnt, cardId) {
   elmnt.ontouchstart = dragMouseDown;
 
   function dragMouseDown(e) {
-    // Не перетаскивать, если нажали на кнопку внутри карточки
     if (e.target.tagName.toLowerCase() === 'button') return;
     
-    e.preventDefault();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
@@ -337,7 +349,6 @@ function makeCardDraggable(elmnt, cardId) {
   }
 
   function elementDrag(e) {
-    e.preventDefault();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
@@ -356,11 +367,10 @@ function makeCardDraggable(elmnt, cardId) {
     document.ontouchend = null;
     document.ontouchmove = null;
 
-    // Сохраняем итоговое положение в Firebase
     if (roomRef) {
       roomRef.child(`cards/${cardId}`).update({
-        x: parseInt(elmnt.style.left),
-        y: parseInt(elmnt.style.top)
+        x: parseInt(elmnt.style.left, 10),
+        y: parseInt(elmnt.style.top, 10)
       });
     }
   }
@@ -372,7 +382,7 @@ function deleteCardFromBoard(cardId) {
   }
 }
 
-// --- ЧАТ И ОБРАБОТКА ФАЙЛОВ/КАРТИНКОВ ---
+// --- ЧАТ И ОБРАБОТКА ФАЙЛОВ / КАРТИНОК ---
 function handleChatFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -563,7 +573,8 @@ function showAdminModal() {
 }
 
 function updatePupilPin(uid) {
-  const newPin = document.getElementById(`pin_${uid}`).value.trim();
+  const pinElem = document.getElementById(`pin_${uid}`);
+  const newPin = pinElem ? pinElem.value.trim() : '';
   if (newPin) {
     db.ref(`users/${uid}/pin`).set(newPin);
     alert('Пароль успешно обновлен!');
@@ -572,7 +583,8 @@ function updatePupilPin(uid) {
 
 function switchToPupil(uid) {
   currentPupilId = uid;
-  document.getElementById('panelTitle').innerText = `Урок (${currentPupilId})`;
+  const panelTitle = document.getElementById('panelTitle');
+  if (panelTitle) panelTitle.innerText = `Урок (${currentPupilId})`;
   initBoardSync();
   closeExerciseModal();
 }
@@ -660,7 +672,7 @@ function addQuizInputRow() {
   row.style.gap = '6px';
   row.innerHTML = `
     <input type="text" class="quiz-item-input" placeholder="Слово или выражение..." style="flex:1; padding:6px; border-radius:4px; border:1px solid #45475a; background:#181825; color:#cdd6f4;">
-    <button onclick="this.parentElement.remove()" style="background:#f38ba8; color:#11111b; border:none; border-radius:4px; cursor:padding:0 8px;">✕</button>
+    <button onclick="this.parentElement.remove()" style="background:#f38ba8; color:#11111b; border:none; border-radius:4px; cursor:pointer; padding:0 8px;">✕</button>
   `;
   container.appendChild(row);
 }
@@ -673,8 +685,3 @@ function sendQuizToBoard() {
   });
   closeExerciseModal();
 }
-
-
-
-
-        
