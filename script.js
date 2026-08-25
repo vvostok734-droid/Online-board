@@ -1,6 +1,6 @@
 // Конфигурация Firebase
 const firebaseConfig = {
-  databaseURL: "https://YOUR_DATABASE_NAME.firebaseio.com" // <-- Вставь сюда реальный URL своей базы
+  databaseURL: "https://online-board-5ad8c-default-rtdb.firebaseio.com"// <-- Вставь сюда реальный URL своей базы
 };
 
 let db = null;
