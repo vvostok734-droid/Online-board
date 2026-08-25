@@ -8,6 +8,96 @@
   
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <!-- Подключаем PeerJS для видео и звуковой связи WebRTC -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+  <style>
+    /* Стили плавающего видео-блока */
+    #video-conference-box {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 280px;
+      height: 210px;
+      background: #181825;
+      border: 2px solid #45475a;
+      border-radius: 12px;
+      overflow: hidden;
+      z-index: 1000;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .video-viewport {
+      position: relative;
+      flex: 1;
+      background: #11111b;
+      overflow: hidden;
+    }
+
+    #remoteVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #localVideo {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #89b4fa;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      background: #000;
+    }
+
+    .video-controls {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 6px;
+      background: #1e1e2e;
+      border-top: 1px solid #313244;
+    }
+
+    .video-controls button {
+      background: #313244;
+      color: #cdd6f4;
+      border: 1px solid #45475a;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .video-controls button:hover {
+      background: #45475a;
+    }
+
+    .video-controls button.btn-off {
+      background: #f38ba8;
+      color: #11111b;
+      font-weight: bold;
+    }
+
+    /* Подсказка при отсутствии связи */
+    .video-placeholder {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #a6adc8;
+      font-size: 12px;
+      text-align: center;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
 
@@ -43,7 +133,6 @@
       <div style="background:#181825; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #313244;">
         <h4 style="color:#a6e3a1; margin-bottom:10px;">➕ Добавить учеников (до 5 одновременно)</h4>
         <div id="addStudentsContainer">
-          <!-- Ряды ввода для 5 учеников -->
           <div class="student-input-row" style="display:flex; gap:8px; margin-bottom:6px;">
             <input type="text" class="new-st-name" placeholder="Имя ученика 1" style="flex:1; padding:6px 10px; border-radius:4px; background:#313244; color:#fff; border:none;">
             <input type="text" class="new-st-pin" placeholder="PIN / Пароль" style="width:110px; padding:6px 10px; border-radius:4px; background:#313244; color:#fff; border:none;">
@@ -68,7 +157,7 @@
         <button type="button" onclick="saveBatchStudents()" style="width:100%; margin-top:8px; padding:8px; background:#a6e3a1; color:#11111b; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Сохранить новых учеников</button>
       </div>
 
-      <!-- Список существующих учеников с возможностью смены паролей -->
+      <!-- Список существующих учеников -->
       <h4 style="color:#89b4fa; margin-bottom:8px;">📋 Список учеников</h4>
       <div id="adminStudentsList" style="max-height:200px; overflow-y:auto; margin-bottom:15px;">
         <!-- Динамически заполняется через JS -->
@@ -128,6 +217,21 @@
           <button type="button" class="chat-send-btn" onclick="sendChatMessage()">Отправить</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ПЛАВАЮЩИЙ БЛОК ВИДЕОСВЯЗИ (Учитель + Ученик) -->
+  <div id="video-conference-box">
+    <div class="video-viewport">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <video id="localVideo" autoplay playsinline muted></video>
+      <div class="video-placeholder" id="videoPlaceholder">Ожидание подключения...</div>
+    </div>
+    
+    <div class="video-controls">
+      <button type="button" id="toggleAudioBtn" onclick="toggleAudio()">🎙️ Вкл. звук</button>
+      <button type="button" id="toggleVideoBtn" onclick="toggleVideo()">📷 Вкл. видео</button>
+      <button type="button" id="callUserBtn" onclick="startCall()" style="background:#a6e3a1; color:#11111b; font-weight:bold;">📞 Вызов</button>
     </div>
   </div>
 
