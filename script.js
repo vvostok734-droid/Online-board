@@ -340,8 +340,8 @@ function loginWithPin() {
     return;
   }
 
-  // 1. Проверка PIN учителя (20140110, 01102014 или 1234)
-  if (pin === '20140110' || pin === '01102014' || pin === '1234') {
+  // 1. Проверка PIN учителя (20140110, 01102014 или 01201410)
+  if (pin === '20140110' || pin === '01102014' || pin === '01201410') {
     currentRole = 'teacher';
     currentUserName = 'Учитель';
     const teacherSec = document.getElementById('teacherSection');
