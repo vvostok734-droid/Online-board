@@ -16,7 +16,7 @@
     <div class="auth-box">
       <h2>🎓 Вход на урок</h2>
       <p>Введите ваш PIN-код доступа:</p>
-      <input type="password" id="authPinInput" placeholder="••••">
+      <input type="password" id="authPinInput" placeholder="••••" onkeydown="if(event.key==='Enter') loginWithPin()">
       <button type="button" onclick="loginWithPin()">Войти</button>
       <div id="authError"></div>
     </div>
@@ -31,6 +31,50 @@
         <button type="button" onclick="confirmBigText()" style="flex:1; padding:10px; background:#a6e3a1; color:#11111b; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Добавить</button>
         <button type="button" onclick="closeBigTextModal()" style="flex:1; padding:10px; background:#f38ba8; color:#11111b; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Отмена</button>
       </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА УПРАВЛЕНИЯ УЧЕНИКАМИ (ПАНЕЛЬ УЧИТЕЛЯ) -->
+  <div id="admin-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999; justify-content:center; align-items:center;">
+    <div class="modal-box" style="background:#1e1e2e; color:#cdd6f4; padding:20px; border-radius:12px; width:90%; max-width:550px; max-height:85vh; overflow-y:auto; border:1px solid #45475a;">
+      <h3 style="color:#b4befe; margin-bottom:15px; text-align:center;">👥 Управление учениками</h3>
+      
+      <!-- Форма добавления до 5 учеников -->
+      <div style="background:#181825; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #313244;">
+        <h4 style="color:#a6e3a1; margin-bottom:10px;">➕ Добавить учеников (до 5 одновременно)</h4>
+        <div id="addStudentsContainer">
+          <!-- Ряды ввода для 5 учеников -->
+          <div class="student-input-row" style="display:flex; gap:8px; margin-bottom:6px;">
+            <input type="text" class="new-st-name" placeholder="Имя ученика 1" style="flex:1; padding:6px 10px; border-radius:4px; background:#313244; color:#fff; border:none;">
+            <input type="text" class="new-st-pin" placeholder="PIN / Пароль" style="width:110px; padding:6px 10px; border-radius:4px; background:#313244; color:#fff; border:none;">
+          </div>
+          <div class="student-input-row" style="display:flex; gap:8px; margin-bottom:6px;">
+            <input type="text" class="new-st-name" placeholder="Имя ученика 2" style="flex:1; padding:6px 10px; border-radius:4px; background:#313244; color:#fff; border:none;">
+            <input type="text" class="new-st-pin" placeholder="PIN / Пароль" style="width:110px; padding:6px 10px; border-radius:4px; background:#313244; color:#fff; border:none;">
+          </div>
+          <div class="student-input-row" style="display:flex; gap:8px; margin-bottom:6px;">
+            <input type="text" class="new-st-name" placeholder="Имя ученика 3" style="flex:1; padding:6px 10px; border-radius:4px; background:#313244; color:#fff; border:none;">
+            <input type="text" class="new-st-pin" placeholder="PIN / Пароль" style="width:110px; padding:6px 10px; border-radius:4px; background:#313244; color:#fff; border:none;">
+          </div>
+          <div class="student-input-row" style="display:flex; gap:8px; margin-bottom:6px;">
+            <input type="text" class="new-st-name" placeholder="Имя ученика 4" style="flex:1; padding:6px 10px; border-radius:4px; background:#313244; color:#fff; border:none;">
+            <input type="text" class="new-st-pin" placeholder="PIN / Пароль" style="width:110px; padding:6px 10px; border-radius:4px; background:#313244; color:#fff; border:none;">
+          </div>
+          <div class="student-input-row" style="display:flex; gap:8px; margin-bottom:6px;">
+            <input type="text" class="new-st-name" placeholder="Имя ученика 5" style="flex:1; padding:6px 10px; border-radius:4px; background:#313244; color:#fff; border:none;">
+            <input type="text" class="new-st-pin" placeholder="PIN / Пароль" style="width:110px; padding:6px 10px; border-radius:4px; background:#313244; color:#fff; border:none;">
+          </div>
+        </div>
+        <button type="button" onclick="saveBatchStudents()" style="width:100%; margin-top:8px; padding:8px; background:#a6e3a1; color:#11111b; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Сохранить новых учеников</button>
+      </div>
+
+      <!-- Список существующих учеников с возможностью смены паролей -->
+      <h4 style="color:#89b4fa; margin-bottom:8px;">📋 Список учеников</h4>
+      <div id="adminStudentsList" style="max-height:200px; overflow-y:auto; margin-bottom:15px;">
+        <!-- Динамически заполняется через JS -->
+      </div>
+
+      <button type="button" onclick="closeAdminModal()" style="width:100%; padding:10px; background:#f38ba8; color:#11111b; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Закрыть</button>
     </div>
   </div>
 
@@ -52,8 +96,9 @@
       <button type="button" onclick="showBigTextModal()" style="background:#cba6f7; color:#11111b; font-weight:bold;">📄 Написать текст</button>
     </div>
 
+    <!-- Кнопка видна только учителю -->
     <div class="top-section" id="teacherSection" style="display:none;">
-      <button type="button" onclick="showAdminModal()" style="background:#b4befe; color:#11111b; font-weight:bold;">👑 Пароли учеников</button>
+      <button type="button" onclick="showAdminModal()" style="background:#b4befe; color:#11111b; font-weight:bold;">👥 Панель учеников</button>
     </div>
 
     <div class="top-section">
