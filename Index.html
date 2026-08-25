@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Учебная Доска</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Подключение Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <!-- ОКНО ВВОДА ПАРОЛЯ ПРИ ВХОДЕ -->
+  <div id="auth-overlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#11111b; display:flex; justify-content:center; align-items:center; z-index:9999;">
+    <div style="background:#1e1e2e; padding:25px; border-radius:12px; border:1px solid #89b4fa; box-shadow: 0 8px 24px rgba(0,0,0,0.6); text-align:center; max-width:320px; width:90%;">
+      <h2 style="color:#89b4fa; margin-top:0;">🎓 Вход на урок</h2>
+      <p style="color:#cdd6f4; font-size:14px; margin-bottom:15px;">Введите ваш PIN-код доступа:</p>
+      <input type="password" id="authPinInput" placeholder="••••" style="width:100%; padding:10px; font-size:20px; text-align:center; border-radius:6px; border:1px solid #45475a; background:#181825; color:#cdd6f4; box-sizing:border-box; margin-bottom:15px; letter-spacing:4px;">
+      <button onclick="loginWithPin()" style="width:100%; padding:10px; background:#a6e3a1; color:#11111b; border:none; border-radius:6px; font-weight:bold; font-size:16px; cursor:pointer;">Войти</button>
+      <div id="authError" style="color:#f38ba8; margin-top:10px; font-size:13px; display:none;"></div>
+    </div>
+  </div>
+
+  <!-- ВЕРХНЯЯ ПАНЕЛЬ С КНОПКАМИ И ИНСТРУМЕНТАМИ -->
+  <div id="top-bar">
+    <!-- Рисование -->
+    <div class="top-section">
+      <button onclick="setPen()">✏️ Кисть</button>
+      <button onclick="setEraser()">🧹 Стерка</button>
+      <input type="color" id="colorPicker" value="#000000">
+      <input type="range" id="lineWidth" min="1" max="20" value="4">
+    </div>
+
+    <!-- Загрузка на доску -->
+    <div class="top-section">
+      <button onclick="document.getElementById('boardImageInput').click()" style="background:#89b4fa; color:#11111b;">🖼 Картинка</button>
+      <input type="file" id="boardImageInput" accept="image/*" style="display:none;">
+    </div>
+
+    <!-- Документ / Рассказ сверху -->
+    <div class="top-section">
+      <button onclick="showBigTextModal()" style="background:#cba6f7; color:#11111b; font-weight:bold;">📄 Написать текст</button>
+    </div>
+
+    <!-- Тест / Конструктор слов -->
+    <div class="top-section">
+      <button onclick="showExerciseModal('quiz')" style="background:#f9e2af; color:#11111b; font-weight:bold;">📝 Тест</button>
+    </div>
+
+    <!-- Админка учителя (скрыта для учеников) -->
+    <div class="top-section" id="teacherSection" style="display:none;">
+      <button onclick="showAdminModal()" style="background:#b4befe; color:#11111b; font-weight:bold;">👑 Пароли учеников</button>
+    </div>
+
+    <!-- Очистка -->
+    <div class="top-section">
+      <button onclick="clearCanvas()" style="background:#f38ba8; color:#11111b;">🗑 Очистить</button>
+      <button onclick="logout()" style="background:#45475a; color:#cdd6f4; margin-left:5px;">Выход</button>
+    </div>
+  </div>
+
+  <!-- НИЖНЯЯ ОБЛАСТЬ: ДОСКА И ЧАТ СПРАВА -->
+  <div id="main-container">
+    
+    <!-- Доска -->
+    <div id="canvas-container">
+      <div id="board-word-list"></div>
+      <div id="exercise-overlay" class="hidden"></div>
+      <canvas id="paintBoard"></canvas>
+    </div>
+
+    <!-- ЧАТ СПРАВА -->
+    <div id="side-panel">
+      <div class="side-column" id="chat-column">
+        <h4 id="panelTitle">Панель ввода</h4>
+        <div id="chatMessages"></div>
+        <div class="chat-input-area">
+          <input type="text" id="chatInput" placeholder="Введите текст...">
+          <input type="file" id="chatFileInput" style="display:none;">
+          <button onclick="document.getElementById('chatFileInput').click()" style="background:#89b4fa; color:#11111b;" title="Прикрепить файл">📎</button>
+          <button onclick="sendTextToBoardFromInput()" style="background:#a6e3a1; color:#11111b; font-weight:bold;">Текст</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
