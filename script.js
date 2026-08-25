@@ -1,6 +1,6 @@
 // Конфигурация Firebase
 const firebaseConfig = {
-  databaseURL: "https://YOUR_DATABASE_NAME.firebaseio.com"
+  databaseURL: "https://YOUR_DATABASE_NAME.firebaseio.com" // <-- Вставь сюда реальный URL своей базы
 };
 
 let db = null;
@@ -324,10 +324,13 @@ function compressImage(src, maxWidth, quality, callback) {
 
 function loginWithPin() {
   const pinInput = document.getElementById('authPinInput');
-  const pin = pinInput ? pinInput.value.trim() : '';
+  const pin = pinInput ? String(pinInput.value).trim() : '';
   const errorElement = document.getElementById('authError');
 
-  if (errorElement) errorElement.style.display = 'none';
+  if (errorElement) {
+    errorElement.style.display = 'none';
+    errorElement.innerText = '';
+  }
 
   if (!pin) {
     if (errorElement) {
@@ -337,8 +340,8 @@ function loginWithPin() {
     return;
   }
 
-  // 1. Проверка PIN учителя (основной 20140110 или резервный 1234)
-  if (pin === '20140110' || pin === '01102014') {
+  // 1. Проверка PIN учителя (20140110, 01102014 или 1234)
+  if (pin === '20140110' || pin === '01102014' || pin === '1234') {
     currentRole = 'teacher';
     currentUserName = 'Учитель';
     const teacherSec = document.getElementById('teacherSection');
@@ -347,51 +350,54 @@ function loginWithPin() {
     return;
   }
 
-  // 2. Поиск ученика по PIN в Firebase
-  if (db) {
-    db.ref('students').once('value').then((snapshot) => {
-      const students = snapshot.val();
-      let foundStudent = null;
+  // 2. Проверка подключения к базы данных
+  if (!db || firebaseConfig.databaseURL.includes('YOUR_DATABASE_NAME')) {
+    if (errorElement) {
+      errorElement.style.display = 'block';
+      errorElement.innerText = 'Ошибка: Проверь databaseURL в начале script.js!';
+    }
+    return;
+  }
 
-      if (students) {
-        Object.keys(students).forEach((key) => {
-          if (students[key].pin === pin) {
-            foundStudent = students[key];
-          }
-        });
-      }
+  // 3. Поиск ученика по PIN в Firebase Realtime Database
+  db.ref('students').once('value').then((snapshot) => {
+    const students = snapshot.val();
+    let foundStudent = null;
 
-      if (foundStudent) {
-        currentRole = 'student';
-        currentUserName = foundStudent.name || 'Ученик';
-        const teacherSec = document.getElementById('teacherSection');
-        if (teacherSec) teacherSec.style.display = 'none';
-        document.getElementById('auth-overlay').style.display = 'none';
-      } else {
-        if (errorElement) {
-          errorElement.style.display = 'block';
-          errorElement.innerText = 'Неверный PIN-код!';
+    if (students) {
+      Object.keys(students).forEach((key) => {
+        const studentPin = String(students[key].pin || '').trim();
+        if (studentPin === pin) {
+          foundStudent = students[key];
         }
-      }
-    }).catch(() => {
+      });
+    }
+
+    if (foundStudent) {
+      currentRole = 'student';
+      currentUserName = foundStudent.name || 'Ученик';
+      const teacherSec = document.getElementById('teacherSection');
+      if (teacherSec) teacherSec.style.display = 'none';
+      document.getElementById('auth-overlay').style.display = 'none';
+    } else {
       if (errorElement) {
         errorElement.style.display = 'block';
-        errorElement.innerText = 'Ошибка сети. Попробуйте еще раз.';
+        errorElement.innerText = 'Ученик с таким PIN-кодом не найден!';
       }
-    });
-  } else {
-    // Режим работы без базы (автономный)
-    currentRole = 'student';
-    currentUserName = 'Ученик';
-    const teacherSec = document.getElementById('teacherSection');
-    if (teacherSec) teacherSec.style.display = 'none';
-    document.getElementById('auth-overlay').style.display = 'none';
-  }
+    }
+  }).catch((err) => {
+    console.error("Ошибка авторизации:", err);
+    if (errorElement) {
+      errorElement.style.display = 'block';
+      errorElement.innerText = 'Ошибка базы данных: ' + err.message;
+    }
+  });
 }
 
 function logout() {
   document.getElementById('auth-overlay').style.display = 'flex';
-  document.getElementById('authPinInput').value = '';
+  const pinInput = document.getElementById('authPinInput');
+  if (pinInput) pinInput.value = '';
 }
 
 // ==========================================
@@ -426,7 +432,7 @@ function saveBatchStudents() {
 
   nameInputs.forEach((input, index) => {
     const name = input.value.trim();
-    const pin = pinInputs[index].value.trim();
+    const pin = pinInputs[index] ? String(pinInputs[index].value).trim() : '';
 
     if (name && pin) {
       const newKey = db.ref('students').push().key;
@@ -476,7 +482,7 @@ function loadAdminStudentsList() {
     Object.keys(students).forEach((id) => {
       const st = students[id];
       const row = document.createElement('div');
-      row.style.cssText = 'display:flex; justify-space-between; align-items:center; background:#181825; padding:8px 12px; margin-bottom:6px; border-radius:6px;';
+      row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:#181825; padding:8px 12px; margin-bottom:6px; border-radius:6px;';
       
       row.innerHTML = `
         <div style="flex:1;">
