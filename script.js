@@ -41,7 +41,6 @@ function loginWithPin() {
   // 1. Проверка на Учителя
   if (pin === TEACHER_PIN) {
     currentRole = 'teacher';
-    // По умолчанию учителю открываем доску первого ученика
     currentPupilId = 'pupil_1'; 
     startSession();
     return;
@@ -233,7 +232,7 @@ function stopDrawing() {
   if (isDrawing) {
     isDrawing = false;
     ctx.beginPath();
-    saveCanvasToFirebase(); // Сохраняем и передаем штрих
+    saveCanvasToFirebase();
   }
 }
 
@@ -247,10 +246,14 @@ if (canvas) {
 }
 
 // --- РАБОТА С КАРТОЧКАМИ НА ДОСКЕ ---
-function sendTextToBoard(text) {
-  if (!text || !roomRef) return;
+function sendTextToBoard(text, imageUrl = null) {
+  if (!roomRef) return;
   const cardId = 'card_' + Date.now();
-  roomRef.child(`cards/${cardId}`).set({ text: text });
+  const cardData = {};
+  if (text) cardData.text = text;
+  if (imageUrl) cardData.imageUrl = imageUrl;
+  
+  roomRef.child(`cards/${cardId}`).set(cardData);
 }
 
 function renderBoardCards(cardsObj) {
@@ -265,18 +268,27 @@ function renderBoardCards(cardsObj) {
   container.innerHTML = '';
 
   for (let cardId in cardsObj) {
-    const text = cardsObj[cardId].text;
+    const card = cardsObj[cardId];
     const div = document.createElement('div');
     div.className = 'board-word-card';
     div.id = cardId;
-    div.setAttribute('data-text', text);
+    
+    let contentHtml = '';
+    if (card.imageUrl) {
+      contentHtml += `<img src="${card.imageUrl}" style="max-width:100%; border-radius:4px; margin-bottom:4px; display:block;">`;
+    }
+    if (card.text) {
+      const safeText = card.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      contentHtml += `<div style="white-space: pre-wrap; word-break: break-word;">${safeText}</div>`;
+      div.setAttribute('data-text', card.text);
+    }
 
-    const safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const speakBtnHtml = card.text ? `<button onclick="speakWord(this.parentElement.parentElement.getAttribute('data-text'))" style="cursor:pointer; padding:2px 4px;" title="Озвучить">🔊</button>` : '';
 
     div.innerHTML = `
-      <div style="white-space: pre-wrap; word-break: break-word;">${safeText}</div>
+      ${contentHtml}
       <div class="word-actions">
-        <button onclick="speakWord(this.parentElement.parentElement.getAttribute('data-text'))" style="cursor:pointer; padding:2px 4px;" title="Озвучить">🔊</button>
+        ${speakBtnHtml}
         <button class="btn-delete" onclick="deleteCardFromBoard('${cardId}')" style="cursor:pointer; padding:2px 6px;" title="Удалить">✕</button>
       </div>
     `;
@@ -290,7 +302,99 @@ function deleteCardFromBoard(cardId) {
   }
 }
 
-// --- ЧАТ И ТЕКСТ В ПАНЕЛИ СПРАВА ---
+// --- ЧАТ И ОБРАБОТКА ФАЙЛОВ/КАРТИНКОВ ---
+function handleChatFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // 1. Обработка изображений (JPEG, PNG и т.д.)
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      // Сжимаем картинку с мобильного телефона перед отправкой
+      compressImage(e.target.result, 800, 0.7, (compressedDataUrl) => {
+        addMediaToChat(compressedDataUrl, 'image');
+      });
+    };
+    reader.readAsDataURL(file);
+  } 
+  // 2. Обработка текстовых файлов
+  else if (file.type.startsWith('text/')) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const input = document.getElementById('chatInput');
+      if (input) input.value = e.target.result;
+    };
+    reader.readAsText(file);
+  } else {
+    alert('Пожалуйста, выберите изображение или текстовый файл.');
+  }
+
+  event.target.value = ''; // Сброс инпута
+}
+
+// Функция сжатия изображения для мобильных устройств
+function compressImage(base64Str, maxWidth, quality, callback) {
+  const img = new Image();
+  img.src = base64Str;
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    let width = img.width;
+    let height = img.height;
+
+    if (width > maxWidth) {
+      height = Math.round((height * maxWidth) / width);
+      width = maxWidth;
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, width, height);
+    callback(canvas.toDataURL('image/jpeg', quality));
+  };
+}
+
+function addMediaToChat(dataUrl, type) {
+  const chatMessages = document.getElementById('chatMessages');
+  if (!chatMessages) return;
+
+  const msgId = 'msg_' + Date.now() + Math.floor(Math.random() * 1000);
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'chat-msg';
+  msgDiv.id = msgId;
+
+  msgDiv.style.position = 'relative';
+  msgDiv.style.marginBottom = '8px';
+  msgDiv.style.padding = '8px';
+  msgDiv.style.background = '#313244';
+  msgDiv.style.borderRadius = '6px';
+  msgDiv.style.color = '#cdd6f4';
+
+  msgDiv.innerHTML = `
+    <button onclick="document.getElementById('${msgId}').remove()" style="position:absolute; top:2px; right:4px; background:transparent; border:none; color:#f38ba8; cursor:pointer; font-weight:bold;">✕</button>
+    <div style="margin-bottom:6px;"><img src="${dataUrl}" style="max-width:100%; border-radius:4px; display:block;"></div>
+    <div style="display:flex; gap:6px; align-items:center;">
+      <button onclick="sendImageToBoardFromChat('${msgId}')" style="cursor:pointer; padding:2px 8px; background:#a6e3a1; color:#11111b; border:none; border-radius:4px; font-weight:bold; font-size:12px;">На доску ➔</button>
+    </div>
+  `;
+
+  msgDiv.setAttribute('data-image', dataUrl);
+  chatMessages.appendChild(msgDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function sendImageToBoardFromChat(msgId) {
+  const msgElem = document.getElementById(msgId);
+  if (!msgElem) return;
+  const imageUrl = msgElem.getAttribute('data-image');
+  if (imageUrl) {
+    sendTextToBoard(null, imageUrl);
+    msgElem.remove();
+  }
+}
+
 function sendTextToChat() {
   const input = document.getElementById('chatInput');
   if (!input) return;
@@ -337,7 +441,7 @@ function moveElementToBoard(msgId) {
   if (!msgElem) return;
   const text = msgElem.getAttribute('data-text');
   if (text) {
-    sendTextToBoard(text);
+    sendTextToBoard(text, null);
     msgElem.remove();
   }
 }
@@ -367,27 +471,27 @@ function showAdminModal() {
       const u = users[uid];
       const isCurrent = uid === currentPupilId ? ' (Активный урок)' : '';
       rowsHtml += `
-        <div style="background:#181825; padding:8px; border-radius:6px; margin-bottom:8px; border:1px solid #45475a;">
-          <div style="font-weight:bold; color:#89b4fa; margin-bottom:4px;">${u.name}${isCurrent}</div>
-          <div style="display:flex; gap:6px; align-items:center;">
-            <input type="text" id="pin_${uid}" value="${u.pin}" style="width:80px; padding:4px; text-align:center; border-radius:4px; border:1px solid #45475a; background:#313244; color:#cdd6f4;">
-            <button onclick="updatePupilPin('${uid}')" style="background:#a6e3a1; color:#11111b; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">Сохранить PIN</button>
-            <button onclick="switchToPupil('${uid}')" style="background:#f9e2af; color:#11111b; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">Открыть доску</button>
+        <div style="background:#181825; padding:10px; border-radius:6px; margin-bottom:8px; border:1px solid #45475a; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px;">
+          <div style="font-weight:bold; color:#89b4fa; flex:1; min-width:120px;">${u.name}${isCurrent}</div>
+          <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+            <input type="text" id="pin_${uid}" value="${u.pin}" style="width:70px; padding:6px; text-align:center; border-radius:4px; border:1px solid #45475a; background:#313244; color:#cdd6f4; font-weight:bold;">
+            <button onclick="updatePupilPin('${uid}')" style="background:#a6e3a1; color:#11111b; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">Сохранить PIN</button>
+            <button onclick="switchToPupil('${uid}')" style="background:#f9e2af; color:#11111b; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">Открыть доску</button>
           </div>
         </div>
       `;
     }
 
     overlay.innerHTML = `
-      <div style="background:#1e1e2e; padding:15px; border-radius:8px; color:#cdd6f4; max-width:380px; width:90%; margin:20px auto; border:1px solid #b4befe; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <h3 style="margin:0; color:#b4befe;">👑 Пароли учеников</h3>
-          <button onclick="closeExerciseModal()" style="background:transparent; border:none; color:#f38ba8; font-size:18px; cursor:pointer; font-weight:bold;">✕</button>
+      <div style="background:#1e1e2e; padding:20px; border-radius:10px; color:#cdd6f4; max-width:520px; width:92%; margin:30px auto; border:1px solid #b4befe; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #313244; padding-bottom:10px;">
+          <h3 style="margin:0; color:#b4befe; font-size:18px;">👑 Пароли и комнаты учеников</h3>
+          <button onclick="closeExerciseModal()" style="background:transparent; border:none; color:#f38ba8; font-size:20px; cursor:pointer; font-weight:bold;">✕</button>
         </div>
 
-        <div style="max-height:250px; overflow-y:auto; margin-bottom:10px;">${rowsHtml}</div>
+        <div style="max-height:350px; overflow-y:auto; margin-bottom:15px; padding-right:4px;">${rowsHtml}</div>
 
-        <button onclick="addNewPupil()" style="background:#89b4fa; color:#11111b; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; width:100%; font-weight:bold;">➕ Добавить ученика</button>
+        <button onclick="addNewPupil()" style="background:#89b4fa; color:#11111b; border:none; padding:10px 14px; border-radius:6px; cursor:pointer; width:100%; font-weight:bold; font-size:14px;">➕ Добавить нового ученика</button>
       </div>
     `;
   });
@@ -419,6 +523,14 @@ function addNewPupil() {
   });
 }
 
+function closeExerciseModal() {
+  const overlay = document.getElementById('exercise-overlay');
+  if (overlay) {
+    overlay.style.display = 'none';
+    overlay.classList.add('hidden');
+  }
+}
+
 // --- БОЛЬШОЙ ТЕКСТ / ТЕСТ ---
 function showBigTextModal() {
   const overlay = document.getElementById('exercise-overlay');
@@ -443,7 +555,7 @@ function sendBigTextToBoard() {
   if (!textarea) return;
   const text = textarea.value.trim();
   if (text) {
-    sendTextToBoard(text);
+    sendTextToBoard(text, null);
     closeExerciseModal();
   }
 }
@@ -486,27 +598,13 @@ function addQuizInputRow() {
     <button onclick="this.parentElement.remove()" style="background:#f38ba8; color:#11111b; border:none; border-radius:4px; cursor:pointer; padding:0 8px;">✕</button>
   `;
   container.appendChild(row);
-  container.scrollTop = container.scrollHeight;
 }
 
 function sendQuizToBoard() {
   const inputs = document.querySelectorAll('.quiz-item-input');
-  let count = 0;
   inputs.forEach(input => {
-    const text = input.value.trim();
-    if (text) {
-      sendTextToBoard(text);
-      count++;
-    }
+    const val = input.value.trim();
+    if (val) sendTextToBoard(val, null);
   });
-  if (count > 0) closeExerciseModal();
-}
-
-function closeExerciseModal() {
-  const overlay = document.getElementById('exercise-overlay');
-  if (overlay) {
-    overlay.style.display = 'none';
-    overlay.classList.add('hidden');
-    overlay.innerHTML = '';
-  }
+  closeExerciseModal();
 }
