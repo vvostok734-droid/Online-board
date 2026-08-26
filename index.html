@@ -19,7 +19,7 @@
       bottom: 20px;
       right: 20px;
       width: 280px;
-      height: 210px;
+      height: 240px;
       background: #181825;
       border: 2px solid #45475a;
       border-radius: 12px;
@@ -28,6 +28,22 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       display: flex;
       flex-direction: column;
+      user-select: none;
+    }
+
+    .video-header {
+      background: #313244;
+      color: #cdd6f4;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: bold;
+      text-align: center;
+      cursor: grab;
+      border-bottom: 1px solid #45475a;
+    }
+
+    .video-header:active {
+      cursor: grabbing;
     }
 
     .video-viewport {
@@ -222,6 +238,7 @@
 
   <!-- ПЛАВАЮЩИЙ БЛОК ВИДЕОСВЯЗИ (Учитель + Ученик) -->
   <div id="video-conference-box">
+    <div class="video-header" id="videoHeader">🎥 Видеосвязь (тяни заголовок)</div>
     <div class="video-viewport">
       <video id="remoteVideo" autoplay playsinline></video>
       <video id="localVideo" autoplay playsinline muted></video>
