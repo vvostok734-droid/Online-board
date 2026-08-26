@@ -399,18 +399,7 @@ function loginWithPin() {
     return;
   }
 
-  // 1. Проверка PIN учителя
-  if (pin === '20140110' || pin === '01102014' || pin === '01201410') {
-    currentRole = 'teacher';
-    currentUserName = 'Учитель';
-    const teacherSec = document.getElementById('teacherSection');
-    if (teacherSec) teacherSec.style.display = 'block';
-    document.getElementById('auth-overlay').style.display = 'none';
-    initPeerJS();
-    return;
-  }
-
-  // 2. Проверка базы
+  // Проверка подключения базы
   if (!db || firebaseConfig.databaseURL.includes('YOUR_DATABASE_NAME')) {
     if (errorElement) {
       errorElement.style.display = 'block';
@@ -419,33 +408,58 @@ function loginWithPin() {
     return;
   }
 
-  // 3. Поиск ученика в Firebase
-  db.ref('students').once('value').then((snapshot) => {
-    const students = snapshot.val();
-    let foundStudent = null;
+  // 1. Сначала ищем PIN в списке учителей Firebase
+  db.ref('teachers').once('value').then((teacherSnapshot) => {
+    const teachers = teacherSnapshot.val();
+    let isTeacher = false;
 
-    if (students) {
-      Object.keys(students).forEach((key) => {
-        const studentPin = String(students[key].pin || '').trim();
-        if (studentPin === pin) {
-          foundStudent = students[key];
+    if (teachers) {
+      Object.keys(teachers).forEach((key) => {
+        const tPin = String(teachers[key].pin || '').trim();
+        if (tPin === pin) {
+          isTeacher = true;
         }
       });
     }
 
-    if (foundStudent) {
-      currentRole = 'student';
-      currentUserName = foundStudent.name || 'Ученик';
+    if (isTeacher) {
+      currentRole = 'teacher';
+      currentUserName = 'Учитель';
       const teacherSec = document.getElementById('teacherSection');
-      if (teacherSec) teacherSec.style.display = 'none';
+      if (teacherSec) teacherSec.style.display = 'block';
       document.getElementById('auth-overlay').style.display = 'none';
       initPeerJS();
-    } else {
-      if (errorElement) {
-        errorElement.style.display = 'block';
-        errorElement.innerText = 'Ученик с таким PIN-кодом не найден!';
-      }
+      return;
     }
+
+    // 2. Если не учитель — ищем среди учеников
+    return db.ref('students').once('value').then((studentSnapshot) => {
+      const students = studentSnapshot.val();
+      let foundStudent = null;
+
+      if (students) {
+        Object.keys(students).forEach((key) => {
+          const studentPin = String(students[key].pin || '').trim();
+          if (studentPin === pin) {
+            foundStudent = students[key];
+          }
+        });
+      }
+
+      if (foundStudent) {
+        currentRole = 'student';
+        currentUserName = foundStudent.name || 'Ученик';
+        const teacherSec = document.getElementById('teacherSection');
+        if (teacherSec) teacherSec.style.display = 'none';
+        document.getElementById('auth-overlay').style.display = 'none';
+        initPeerJS();
+      } else {
+        if (errorElement) {
+          errorElement.style.display = 'block';
+          errorElement.innerText = 'Неверный PIN-код!';
+        }
+      }
+    });
   }).catch((err) => {
     console.error("Ошибка авторизации:", err);
     if (errorElement) {
@@ -454,6 +468,7 @@ function loginWithPin() {
     }
   });
 }
+
 
 function logout() {
   document.getElementById('auth-overlay').style.display = 'flex';
