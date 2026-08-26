@@ -23,12 +23,12 @@ let currentColor = '#000000';
 let currentLineWidth = 4;
 let isEraser = false;
 
-// ==========================================
-// --- ПЕРЕМЕННЫЕ ДЛЯ ВИДЕОСВЯЗИ (PeerJS) ---
-// ==========================================
+// PeerJS переменные
 let peer = null;
 let localStream = null;
 let currentCall = null;
+let isAudioMuted = false;
+let isVideoMuted = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   canvas = document.getElementById('paintBoard');
@@ -37,13 +37,13 @@ document.addEventListener('DOMContentLoaded', () => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // События мыши
+    // События мыши для рисования
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseleave', stopDrawing);
 
-    // События тачскрина
+    // События тачскрина для рисования
     canvas.addEventListener('touchstart', startDrawingTouch, { passive: false });
     canvas.addEventListener('touchmove', drawTouch, { passive: false });
     canvas.addEventListener('touchend', stopDrawing);
@@ -64,262 +64,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Настройка перетаскивания плавающего видео-блока (Мышь + Сенсор)
+  initVideoBoxDrag();
+
   if (db) {
     listenToCanvas();
     listenToBoardItems();
     listenToChat();
   }
-
-  // Инициализируем камеру и PeerJS при загрузке страницы
-  initVideoConference();
-
-  // Инициализируем логику перетаскивания окна видео
-  initVideoDragging();
 });
 
-// ==========================================
-// --- ПЕРЕТАСКИВАНИЕ ОКНА ВИДЕО ---
-// ==========================================
-
-function initVideoDragging() {
-  const videoContainer = document.getElementById('video-conference-box');
-  if (!videoContainer) return;
-
-  let isDragging = false;
-  let startX = 0, startY = 0;
-  let initialX = 0, initialY = 0;
-
-  const startDrag = (clientX, clientY, target) => {
-    // Игнорируем перетаскивание при клике на элементы управления
-    if (target.tagName === 'BUTTON' || target.tagName === 'INPUT' || target.tagName === 'VIDEO' || target.closest('.video-controls')) {
-      return false;
-    }
-
-    isDragging = true;
-    startX = clientX;
-    startY = clientY;
-
-    const rect = videoContainer.getBoundingClientRect();
-    initialX = rect.left;
-    initialY = rect.top;
-
-    videoContainer.style.position = 'fixed';
-    videoContainer.style.bottom = 'auto';
-    videoContainer.style.right = 'auto';
-    videoContainer.style.left = initialX + 'px';
-    videoContainer.style.top = initialY + 'px';
-    return true;
-  };
-
-  const moveDrag = (clientX, clientY) => {
-    if (!isDragging) return;
-
-    const dx = clientX - startX;
-    const dy = clientY - startY;
-
-    let newX = initialX + dx;
-    let newY = initialY + dy;
-
-    // Ограничиваем рамками экрана
-    const maxX = window.innerWidth - videoContainer.offsetWidth;
-    const maxY = window.innerHeight - videoContainer.offsetHeight;
-
-    newX = Math.max(0, Math.min(newX, maxX));
-    newY = Math.max(0, Math.min(newY, maxY));
-
-    videoContainer.style.left = newX + 'px';
-    videoContainer.style.top = newY + 'px';
-  };
-
-  const endDrag = () => {
-    isDragging = false;
-  };
-
-  // События мыши
-  videoContainer.addEventListener('mousedown', (e) => {
-    if (startDrag(e.clientX, e.clientY, e.target)) {
-      e.preventDefault();
-    }
-  });
-
-  window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
-  window.addEventListener('mouseup', endDrag);
-
-  // Сенсорные события
-  videoContainer.addEventListener('touchstart', (e) => {
-    const touch = e.touches[0];
-    startDrag(touch.clientX, touch.clientY, e.target);
-  }, { passive: true });
-
-  window.addEventListener('touchmove', (e) => {
-    if (isDragging) {
-      const touch = e.touches[0];
-      moveDrag(touch.clientX, touch.clientY);
-    }
-  }, { passive: true });
-
-  window.addEventListener('touchend', endDrag);
-}
-
-// ==========================================
-// --- ЛОГИКА ВИДЕО И ЗВУКА (PeerJS) ---
-// ==========================================
-
-async function initVideoConference() {
-  try {
-    // Включаем камеру локально сразу, не дожидаясь подключения ученика
-    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    
-    const localVideo = document.getElementById('localVideo');
-    if (localVideo) {
-      localVideo.srcObject = localStream;
-      localVideo.muted = true; // Отключаем звук для локального элемента, чтобы избежать эха
-      localVideo.play().catch(e => console.warn("Автовоспроизведение локального видео заблокировано:", e));
-    }
-
-    // Инициализируем PeerJS для входящих/исходящих вызовов
-    initializePeerConnection('student-' + Math.random().toString(36).substring(2, 7));
-
-  } catch (error) {
-    console.warn("Не удалось получить доступ к камере/микрофону:", error);
-    const placeholder = document.getElementById('videoPlaceholder');
-    if (placeholder) placeholder.innerText = 'Камера/микрофон недоступны';
-  }
-}
-
-function attachRemoteStream(remoteStream) {
-  const remoteVideo = document.getElementById('remoteVideo');
-  if (remoteVideo) {
-    remoteVideo.srcObject = remoteStream;
-    remoteVideo.muted = false;
-    
-    // Попытка запустить воспроизведение звука и видео
-    remoteVideo.play().catch(() => {
-      console.log("Автовоспроизведение заблокировано браузером. Ожидание первого клика.");
-      document.addEventListener('click', () => {
-        remoteVideo.play();
-      }, { once: true });
-    });
-  }
-  const placeholder = document.getElementById('videoPlaceholder');
-  if (placeholder) placeholder.style.display = 'none';
-}
-
-function initializePeerConnection(peerId) {
-  if (peer) {
-    peer.destroy();
-  }
-
-  peer = new Peer(peerId, { debug: 1 });
-
-  peer.on('open', (id) => {
-    console.log('PeerJS ID:', id);
-    if (db) {
-      const roleKey = currentRole === 'teacher' ? 'teacherPeerId' : 'studentPeerId';
-      db.ref(`calls/${roleKey}`).set(id);
-    }
-  });
-
-  peer.on('call', (call) => {
-    currentCall = call;
-    call.answer(localStream);
-    
-    call.on('stream', (remoteStream) => {
-      attachRemoteStream(remoteStream);
-    });
-
-    call.on('close', () => {
-      resetRemoteVideo();
-    });
-  });
-}
-
-function startCall() {
-  if (!db) {
-    alert("База данных не подключена для поиска собеседника!");
-    return;
-  }
-
-  const targetKey = currentRole === 'teacher' ? 'studentPeerId' : 'teacherPeerId';
-
-  db.ref(`calls/${targetKey}`).once('value').then((snapshot) => {
-    const targetPeerId = snapshot.val();
-    if (!targetPeerId) {
-      alert("Собеседник еще не в сети или не подключил камеру!");
-      return;
-    }
-
-    if (!localStream) {
-      alert("Ваша камера не активна!");
-      return;
-    }
-
-    console.log("Звоним пользователю с ID:", targetPeerId);
-    const call = peer.call(targetPeerId, localStream);
-    currentCall = call;
-
-    call.on('stream', (remoteStream) => {
-      attachRemoteStream(remoteStream);
-    });
-
-    call.on('close', () => {
-      resetRemoteVideo();
-    });
-
-  }).catch((err) => {
-    alert("Ошибка соединения: " + err.message);
-  });
-}
-
-function toggleAudio() {
-  if (!localStream) return;
-  const audioTrack = localStream.getAudioTracks()[0];
-  if (audioTrack) {
-    audioTrack.enabled = !audioTrack.enabled;
-    const btn = document.getElementById('toggleAudioBtn');
-    if (audioTrack.enabled) {
-      btn.innerText = '🎙️ Вкл. звук';
-      btn.classList.remove('btn-off');
-    } else {
-      btn.innerText = '🔇 Выкл. звук';
-      btn.classList.add('btn-off');
-    }
-  }
-}
-
-function toggleVideo() {
-  if (!localStream) return;
-  const videoTrack = localStream.getVideoTracks()[0];
-  if (videoTrack) {
-    videoTrack.enabled = !videoTrack.enabled;
-    const btn = document.getElementById('toggleVideoBtn');
-    if (videoTrack.enabled) {
-      btn.innerText = '📷 Вкл. видео';
-      btn.classList.remove('btn-off');
-    } else {
-      btn.innerText = '📷 Выкл. видео';
-      btn.classList.add('btn-off');
-    }
-  }
-}
-
-function resetRemoteVideo() {
-  const remoteVideo = document.getElementById('remoteVideo');
-  if (remoteVideo) remoteVideo.srcObject = null;
-  const placeholder = document.getElementById('videoPlaceholder');
-  if (placeholder) placeholder.style.display = 'block';
-  currentCall = null;
-}
-
-// ==========================================
-// --- РИСОВАНИЕ НА ХОЛСТЕ ---
-// ==========================================
-
+// Сохранение рисунка при изменении размера экрана
 function resizeCanvas() {
   const container = document.getElementById('canvas-container');
   if (!container || !canvas) return;
+  
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = canvas.width;
+  tempCanvas.height = canvas.height;
+  const tempCtx = tempCanvas.getContext('2d');
+  if (canvas.width > 0 && canvas.height > 0) {
+    tempCtx.drawImage(canvas, 0, 0);
+  }
+
   canvas.width = container.clientWidth;
   canvas.height = container.clientHeight;
+
+  ctx.drawImage(tempCanvas, 0, 0);
 }
 
 function setPen() { isEraser = false; }
@@ -335,7 +106,14 @@ function draw(e) {
   if (!isDrawing) return;
   ctx.lineWidth = currentLineWidth;
   ctx.lineCap = 'round';
-  ctx.strokeStyle = isEraser ? '#ffffff' : currentColor;
+
+  if (isEraser) {
+    ctx.globalCompositeOperation = 'destination-out';
+  } else {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = currentColor;
+  }
+
   ctx.lineTo(e.offsetX, e.offsetY);
   ctx.stroke();
 }
@@ -356,7 +134,14 @@ function drawTouch(e) {
   const touch = e.touches[0];
   ctx.lineWidth = currentLineWidth;
   ctx.lineCap = 'round';
-  ctx.strokeStyle = isEraser ? '#ffffff' : currentColor;
+
+  if (isEraser) {
+    ctx.globalCompositeOperation = 'destination-out';
+  } else {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = currentColor;
+  }
+
   ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
   ctx.stroke();
 }
@@ -365,6 +150,7 @@ function stopDrawing() {
   if (!isDrawing) return;
   isDrawing = false;
   ctx.closePath();
+  ctx.globalCompositeOperation = 'source-over'; // Возвращаем обычный режим
   if (db) saveCanvasState();
 }
 
@@ -386,6 +172,7 @@ function clearCanvas() {
   }
 }
 
+// Загрузка фото на доску
 function handleBoardImageUpload(e) {
   const file = e.target.files && e.target.files[0];
   if (file && file.type.startsWith('image/')) {
@@ -406,7 +193,7 @@ function handleBoardImageUpload(e) {
 }
 
 // ==========================================
-// --- ЧАТ И СООБЩЕНИЯ ---
+// --- ОТПРАВКА, ОТОБРАЖЕНИЕ И ЧТЕНИЕ ЧАТА ---
 // ==========================================
 
 function sendChatMessage() {
@@ -431,6 +218,9 @@ function handleChatFileUpload(e) {
 
   if (file.type.startsWith('image/')) {
     const reader = new FileReader();
+    reader.onerror = function() {
+      alert("Ошибка при чтении файла");
+    };
     reader.onload = function(event) {
       compressImage(event.target.result, 300, 0.5, function(compressedUrl) {
         const msg = {
@@ -451,13 +241,17 @@ function handleChatFileUpload(e) {
     };
     sendChatPayload(msg);
   }
+
   e.target.value = '';
 }
 
 function sendChatPayload(msg) {
   if (db) {
     try {
-      db.ref('chat/messages').push(msg);
+      db.ref('chat/messages').push(msg).catch(function(err) {
+        console.warn("Firebase отклонил отправку:", err);
+        alert("Ошибка при отправке в чат: " + err.message);
+      });
     } catch (e) {
       console.warn("Ошибка Firebase:", e);
     }
@@ -484,8 +278,9 @@ function addChatMessageToDOM(msg, msgId = null) {
                 </div>`;
   
   if (msgId) {
-    html += `<button onclick="deleteChatMessage('${msgId}')" title="Удалить" style="background:none; border:none; color:#f38ba8; cursor:pointer; font-size:14px; padding:0 0 0 8px; opacity:0.7;">🗑</button>`;
+    html += `<button onclick="deleteChatMessage('${msgId}')" title="Удалить" style="background:none; border:none; color:#f38ba8; cursor:pointer; font-size:14px; padding:0 0 0 8px; opacity:0.7;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑</button>`;
   }
+  
   html += `</div>`;
   
   if (msg.isImage && msg.fileUrl) {
@@ -500,11 +295,14 @@ function addChatMessageToDOM(msg, msgId = null) {
 function deleteChatMessage(msgId) {
   if (confirm("Удалить это сообщение/файл из чата?")) {
     if (db) {
-      db.ref(`chat/messages/${msgId}`).remove();
+      db.ref(`chat/messages/${msgId}`).remove().catch((err) => {
+        alert("Ошибка при удалении: " + err.message);
+      });
     }
   }
 }
 
+// Ввод текста на доску
 function showBigTextModal() {
   const modal = document.getElementById('text-modal');
   if (modal) {
@@ -561,6 +359,7 @@ function addItemToBoardDOM(item) {
   listContainer.appendChild(elem);
 }
 
+// Быстрое сжатие изображений
 function compressImage(src, maxWidth, quality, callback) {
   const img = new Image();
   img.onload = () => {
@@ -579,7 +378,7 @@ function compressImage(src, maxWidth, quality, callback) {
 }
 
 // ==========================================
-// --- АВТОРИЗАЦИЯ И РОЛИ ---
+// --- ВХОД, РОЛИ И АВТОРИЗАЦИЯ УЧЕНИКОВ ---
 // ==========================================
 
 function loginWithPin() {
@@ -600,32 +399,35 @@ function loginWithPin() {
     return;
   }
 
+  // 1. Проверка PIN учителя
   if (pin === '20140110' || pin === '01102014' || pin === '01201410') {
     currentRole = 'teacher';
     currentUserName = 'Учитель';
     const teacherSec = document.getElementById('teacherSection');
     if (teacherSec) teacherSec.style.display = 'block';
     document.getElementById('auth-overlay').style.display = 'none';
-    
-    initializePeerConnection('teacher-room-id');
+    initPeerJS();
     return;
   }
 
-  if (!db) {
+  // 2. Проверка базы
+  if (!db || firebaseConfig.databaseURL.includes('YOUR_DATABASE_NAME')) {
     if (errorElement) {
       errorElement.style.display = 'block';
-      errorElement.innerText = 'Ошибка: База данных недоступна!';
+      errorElement.innerText = 'Ошибка: Проверь databaseURL в начале script.js!';
     }
     return;
   }
 
+  // 3. Поиск ученика в Firebase
   db.ref('students').once('value').then((snapshot) => {
     const students = snapshot.val();
     let foundStudent = null;
 
     if (students) {
       Object.keys(students).forEach((key) => {
-        if (String(students[key].pin || '').trim() === pin) {
+        const studentPin = String(students[key].pin || '').trim();
+        if (studentPin === pin) {
           foundStudent = students[key];
         }
       });
@@ -637,8 +439,7 @@ function loginWithPin() {
       const teacherSec = document.getElementById('teacherSection');
       if (teacherSec) teacherSec.style.display = 'none';
       document.getElementById('auth-overlay').style.display = 'none';
-      
-      initializePeerConnection('student-' + foundStudent.name.toLowerCase().replace(/\s+/g, '-'));
+      initPeerJS();
     } else {
       if (errorElement) {
         errorElement.style.display = 'block';
@@ -646,6 +447,7 @@ function loginWithPin() {
       }
     }
   }).catch((err) => {
+    console.error("Ошибка авторизации:", err);
     if (errorElement) {
       errorElement.style.display = 'block';
       errorElement.innerText = 'Ошибка базы данных: ' + err.message;
@@ -660,7 +462,7 @@ function logout() {
 }
 
 // ==========================================
-// --- АДМИН-ПАНЕЛЬ УЧЕНИКОВ ---
+// --- ПАНЕЛЬ УПРАВЛЕНИЯ УЧЕНИКАМИ ---
 // ==========================================
 
 function showAdminModal() {
@@ -677,7 +479,11 @@ function closeAdminModal() {
 }
 
 function saveBatchStudents() {
-  if (!db) return;
+  if (!db) {
+    alert("База данных недоступна");
+    return;
+  }
+
   const nameInputs = document.querySelectorAll('.new-st-name');
   const pinInputs = document.querySelectorAll('.new-st-pin');
   
@@ -690,7 +496,11 @@ function saveBatchStudents() {
 
     if (name && pin) {
       const newKey = db.ref('students').push().key;
-      updates['students/' + newKey] = { name: name, pin: pin, createdAt: Date.now() };
+      updates['students/' + newKey] = {
+        name: name,
+        pin: pin,
+        createdAt: Date.now()
+      };
       addedCount++;
     }
   });
@@ -704,12 +514,19 @@ function saveBatchStudents() {
     nameInputs.forEach(i => i.value = '');
     pinInputs.forEach(i => i.value = '');
     alert(`Успешно добавлено учеников: ${addedCount}`);
+  }).catch((err) => {
+    alert("Ошибка при сохранении: " + err.message);
   });
 }
 
 function loadAdminStudentsList() {
   const listContainer = document.getElementById('adminStudentsList');
-  if (!listContainer || !db) return;
+  if (!listContainer) return;
+
+  if (!db) {
+    listContainer.innerHTML = '<p style="color:#f38ba8;">База данных не подключена</p>';
+    return;
+  }
 
   db.ref('students').on('value', (snapshot) => {
     const students = snapshot.val();
@@ -724,6 +541,7 @@ function loadAdminStudentsList() {
       const st = students[id];
       const row = document.createElement('div');
       row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:#181825; padding:8px 12px; margin-bottom:6px; border-radius:6px;';
+      
       row.innerHTML = `
         <div style="flex:1;">
           <strong style="color:#cdd6f4;">${st.name}</strong>
@@ -741,14 +559,31 @@ function loadAdminStudentsList() {
 
 function changeStudentPin(studentId, name, currentPin) {
   const newPin = prompt(`Введите новый PIN/пароль для ученика "${name}":`, currentPin);
-  if (newPin && db) {
-    db.ref(`students/${studentId}`).update({ pin: newPin.trim() }).then(() => alert("Пароль изменен!"));
+  
+  if (newPin !== null) {
+    const trimmedPin = newPin.trim();
+    if (!trimmedPin) {
+      alert("PIN-код не может быть пустым!");
+      return;
+    }
+
+    if (db) {
+      db.ref(`students/${studentId}`).update({
+        pin: trimmedPin
+      }).then(() => {
+        alert("Пароль успешно изменен!");
+      }).catch((err) => {
+        alert("Ошибка при обновлении: " + err.message);
+      });
+    }
   }
 }
 
 function deleteStudent(studentId, name) {
-  if (confirm(`Удалить ученика "${name}"?`) && db) {
-    db.ref(`students/${studentId}`).remove();
+  if (confirm(`Удалить ученика "${name}"?`)) {
+    if (db) {
+      db.ref(`students/${studentId}`).remove();
+    }
   }
 }
 
@@ -780,7 +615,9 @@ function listenToBoardItems() {
       listContainer.innerHTML = '';
       const items = snapshot.val();
       if (items) {
-        Object.keys(items).forEach((key) => addItemToBoardDOM(items[key]));
+        Object.keys(items).forEach((key) => {
+          addItemToBoardDOM(items[key]);
+        });
       }
     });
   } catch(e){}
@@ -794,8 +631,194 @@ function listenToChat() {
       chatMessages.innerHTML = '';
       const messages = snapshot.val();
       if (messages) {
-        Object.keys(messages).forEach((key) => addChatMessageToDOM(messages[key], key));
+        Object.keys(messages).forEach((key) => {
+          addChatMessageToDOM(messages[key], key);
+        });
       }
     });
   } catch(e){}
+}
+
+// ==========================================
+// --- WEBRTC И PEERJS (ВИДЕОСВЯЗЬ) ---
+// ==========================================
+
+function initPeerJS() {
+  const myPeerId = (currentRole === 'teacher') ? 'board-teacher-main-id' : undefined;
+
+  // Конфигурация ICE-серверов (STUN / TURN)
+  const peerConfig = {
+    config: {
+      iceServers: [
+        // Публичные STUN-серверы Google (работают всегда и бесплатно)
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        
+        /* 
+        // Если нужен 100% пробой через агрессивный мобильный 4G/5G,
+        // зарегистрируйся на metered.ca (10 GB/мес бесплатно) и вставь свои данные:
+        {
+          urls: "turn:openrelay.metered.ca:80",
+          username: "твой_username",
+          credential: "твой_password"
+        },
+        {
+          urls: "turn:openrelay.metered.ca:443",
+          username: "твой_username",
+          credential: "твой_password"
+        }
+        */
+      ]
+    }
+  };
+
+  // Передаем настройки прямо в PeerJS
+  peer = new Peer(myPeerId, peerConfig);
+
+  peer.on('open', (id) => {
+    console.log('Мой Peer ID:', id);
+    const placeholder = document.getElementById('videoPlaceholder');
+    if (placeholder) {
+      placeholder.innerText = (currentRole === 'teacher') 
+        ? 'Ожидание подключения...' 
+        : 'Нажмите «Вызов» для связи';
+    }
+  });
+
+  // Входящий звонок
+  peer.on('call', (call) => {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        localStream = stream;
+        const localVideo = document.getElementById('localVideo');
+        if (localVideo) localVideo.srcObject = stream;
+
+        call.answer(stream);
+        handleCallStream(call);
+      })
+      .catch((err) => {
+        console.error("Ошибка доступа к камере/микрофону:", err);
+        alert("Не удалось получить доступ к камере или микрофону!");
+      });
+  });
+
+  peer.on('error', (err) => {
+    console.error("PeerJS ошибка:", err);
+  });
+}
+
+
+function startCall() {
+  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    .then((stream) => {
+      localStream = stream;
+      const localVideo = document.getElementById('localVideo');
+      if (localVideo) localVideo.srcObject = stream;
+
+      const targetId = (currentRole === 'teacher') ? prompt("Введите Peer ID ученика:") : 'board-teacher-main-id';
+      
+      if (!targetId) return;
+
+      const call = peer.call(targetId, stream);
+      handleCallStream(call);
+    })
+    .catch((err) => {
+      console.error("Ошибка при вызове:", err);
+      alert("Включите разрешения для камеры и микрофона в браузере!");
+    });
+}
+
+function handleCallStream(call) {
+  currentCall = call;
+  call.on('stream', (remoteStream) => {
+    const remoteVideo = document.getElementById('remoteVideo');
+    if (remoteVideo) remoteVideo.srcObject = remoteStream;
+    
+    const placeholder = document.getElementById('videoPlaceholder');
+    if (placeholder) placeholder.style.display = 'none';
+  });
+
+  call.on('close', () => {
+    const placeholder = document.getElementById('videoPlaceholder');
+    if (placeholder) {
+      placeholder.style.display = 'block';
+      placeholder.innerText = 'Связь завершена';
+    }
+  });
+}
+
+function toggleAudio() {
+  if (!localStream) return;
+  const audioTrack = localStream.getAudioTracks()[0];
+  if (audioTrack) {
+    isAudioMuted = !isAudioMuted;
+    audioTrack.enabled = !isAudioMuted;
+    const btn = document.getElementById('toggleAudioBtn');
+    if (btn) {
+      btn.innerText = isAudioMuted ? '🎙️ Выкл. звук' : '🎙️ Вкл. звук';
+      btn.classList.toggle('btn-off', isAudioMuted);
+    }
+  }
+}
+
+function toggleVideo() {
+  if (!localStream) return;
+  const videoTrack = localStream.getVideoTracks()[0];
+  if (videoTrack) {
+    isVideoMuted = !isVideoMuted;
+    videoTrack.enabled = !isVideoMuted;
+    const btn = document.getElementById('toggleVideoBtn');
+    if (btn) {
+      btn.innerText = isVideoMuted ? '📷 Выкл. видео' : '📷 Вкл. видео';
+      btn.classList.toggle('btn-off', isVideoMuted);
+    }
+  }
+}
+
+// Перетаскивание видео-блока (Мышь + Touch)
+function initVideoBoxDrag() {
+  const videoBox = document.getElementById('video-conference-box');
+  const videoHeader = document.getElementById('videoHeader');
+
+  if (videoBox && videoHeader) {
+    let isDragging = false;
+    let startX, startY, initialLeft, initialTop;
+
+    const startDrag = (e) => {
+      isDragging = true;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      
+      const rect = videoBox.getBoundingClientRect();
+      startX = clientX;
+      startY = clientY;
+      initialLeft = rect.left;
+      initialTop = rect.top;
+    };
+
+    const doDrag = (e) => {
+      if (!isDragging) return;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      const deltaX = clientX - startX;
+      const deltaY = clientY - startY;
+
+      videoBox.style.left = `${initialLeft + deltaX}px`;
+      videoBox.style.top = `${initialTop + deltaY}px`;
+      videoBox.style.bottom = 'auto';
+      videoBox.style.right = 'auto';
+    };
+
+    const stopDrag = () => { isDragging = false; };
+
+    videoHeader.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', doDrag);
+    document.addEventListener('mouseup', stopDrag);
+
+    videoHeader.addEventListener('touchstart', startDrag, { passive: true });
+    document.addEventListener('touchmove', doDrag, { passive: true });
+    document.addEventListener('touchend', stopDrag);
+  }
 }
