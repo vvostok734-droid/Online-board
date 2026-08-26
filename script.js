@@ -72,7 +72,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Инициализируем камеру и PeerJS при загрузке страницы
   initVideoConference();
+
+  // Инициализируем логику перетаскивания окна видео
+  initVideoDragging();
 });
+
+// ==========================================
+// --- ПЕРЕТАСКИВАНИЕ ОКНА ВИДЕО ---
+// ==========================================
+
+function initVideoDragging() {
+  const videoContainer = document.getElementById('video-conference-box');
+  if (!videoContainer) return;
+
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let initialX = 0, initialY = 0;
+
+  const startDrag = (clientX, clientY, target) => {
+    // Игнорируем перетаскивание при клике на элементы управления
+    if (target.tagName === 'BUTTON' || target.tagName === 'INPUT' || target.tagName === 'VIDEO' || target.closest('.video-controls')) {
+      return false;
+    }
+
+    isDragging = true;
+    startX = clientX;
+    startY = clientY;
+
+    const rect = videoContainer.getBoundingClientRect();
+    initialX = rect.left;
+    initialY = rect.top;
+
+    videoContainer.style.position = 'fixed';
+    videoContainer.style.bottom = 'auto';
+    videoContainer.style.right = 'auto';
+    videoContainer.style.left = initialX + 'px';
+    videoContainer.style.top = initialY + 'px';
+    return true;
+  };
+
+  const moveDrag = (clientX, clientY) => {
+    if (!isDragging) return;
+
+    const dx = clientX - startX;
+    const dy = clientY - startY;
+
+    let newX = initialX + dx;
+    let newY = initialY + dy;
+
+    // Ограничиваем рамками экрана
+    const maxX = window.innerWidth - videoContainer.offsetWidth;
+    const maxY = window.innerHeight - videoContainer.offsetHeight;
+
+    newX = Math.max(0, Math.min(newX, maxX));
+    newY = Math.max(0, Math.min(newY, maxY));
+
+    videoContainer.style.left = newX + 'px';
+    videoContainer.style.top = newY + 'px';
+  };
+
+  const endDrag = () => {
+    isDragging = false;
+  };
+
+  // События мыши
+  videoContainer.addEventListener('mousedown', (e) => {
+    if (startDrag(e.clientX, e.clientY, e.target)) {
+      e.preventDefault();
+    }
+  });
+
+  window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+  window.addEventListener('mouseup', endDrag);
+
+  // Сенсорные события
+  videoContainer.addEventListener('touchstart', (e) => {
+    const touch = e.touches[0];
+    startDrag(touch.clientX, touch.clientY, e.target);
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    if (isDragging) {
+      const touch = e.touches[0];
+      moveDrag(touch.clientX, touch.clientY);
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchend', endDrag);
+}
 
 // ==========================================
 // --- ЛОГИКА ВИДЕО И ЗВУКА (PeerJS) ---
@@ -80,7 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function initVideoConference() {
   try {
-    // 1. Запрашиваем доступ к камере и микрофону
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     
     const localVideo = document.getElementById('localVideo');
@@ -88,12 +174,6 @@ async function initVideoConference() {
       localVideo.srcObject = localStream;
     }
 
-    // 2. Инициализируем Peer (фиксированные ID для простоты связи Учитель <-> Ученик)
-    // Учитель всегда регистрируется как 'teacher-room', ученик — как случайный или 'student-room'
-    // Для универсальности: используем уникальный ID или общие роли через Firebase, 
-    // но здесь сделаем простую привязку: учитель ждет вызова как 'online-board-teacher', ученик звонит на него.
-    
-    // Определим ID в зависимости от роли (по умолчанию при входе считаем учеником, после авторизации переподключимся)
     initializePeerConnection('student-' + Math.random().toString(36).substring(2, 7));
 
   } catch (error) {
@@ -103,36 +183,45 @@ async function initVideoConference() {
   }
 }
 
+function attachRemoteStream(remoteStream) {
+  const remoteVideo = document.getElementById('remoteVideo');
+  if (remoteVideo) {
+    remoteVideo.srcObject = remoteStream;
+    remoteVideo.muted = false;
+    
+    // Попытка запустить воспроизведение звука и видео
+    remoteVideo.play().catch(() => {
+      console.log("Автовоспроизведение заблокировано браузером. Ожидание первого клика.");
+      document.addEventListener('click', () => {
+        remoteVideo.play();
+      }, { once: true });
+    });
+  }
+  const placeholder = document.getElementById('videoPlaceholder');
+  if (placeholder) placeholder.style.display = 'none';
+}
+
 function initializePeerConnection(peerId) {
   if (peer) {
     peer.destroy();
   }
 
-  peer = new Peer(peerId, {
-    debug: 1
-  });
+  peer = new Peer(peerId, { debug: 1 });
 
   peer.on('open', (id) => {
     console.log('PeerJS ID:', id);
-    // Сохраняем ID в Firebase, чтобы учитель и ученик знали, куда звонить
     if (db) {
       const roleKey = currentRole === 'teacher' ? 'teacherPeerId' : 'studentPeerId';
       db.ref(`calls/${roleKey}`).set(id);
     }
   });
 
-  // Когда кто-то звонит нам
   peer.on('call', (call) => {
     currentCall = call;
-    call.answer(localStream); // Отвечаем своим потоком
+    call.answer(localStream);
     
     call.on('stream', (remoteStream) => {
-      const remoteVideo = document.getElementById('remoteVideo');
-      if (remoteVideo) {
-        remoteVideo.srcObject = remoteStream;
-      }
-      const placeholder = document.getElementById('videoPlaceholder');
-      if (placeholder) placeholder.style.display = 'none';
+      attachRemoteStream(remoteStream);
     });
 
     call.on('close', () => {
@@ -141,14 +230,12 @@ function initializePeerConnection(peerId) {
   });
 }
 
-// Кнопка ручного вызова (или переподключения)
 function startCall() {
   if (!db) {
     alert("База данных не подключена для поиска собеседника!");
     return;
   }
 
-  // Смотрим в базе ID собеседника: если мы учитель, ищем ученика, и наоборот
   const targetKey = currentRole === 'teacher' ? 'studentPeerId' : 'teacherPeerId';
 
   db.ref(`calls/${targetKey}`).once('value').then((snapshot) => {
@@ -168,13 +255,7 @@ function startCall() {
     currentCall = call;
 
     call.on('stream', (remoteStream) => {
-      const remoteVideo = document.getElementById('remoteVideo');
-      if (remoteVideo) {
-        remoteVideo.srcObject = remoteStream;
-      }
-      const placeholder = document.getElementById('videoPlaceholder');
-      if (placeholder) placeholder.style.display = 'none';
-      alert("Соединение установлено!");
+      attachRemoteStream(remoteStream);
     });
 
     call.on('close', () => {
@@ -186,7 +267,6 @@ function startCall() {
   });
 }
 
-// Управление звуком (микрофоном)
 function toggleAudio() {
   if (!localStream) return;
   const audioTrack = localStream.getAudioTracks()[0];
@@ -203,7 +283,6 @@ function toggleAudio() {
   }
 }
 
-// Управление видео (камерой)
 function toggleVideo() {
   if (!localStream) return;
   const videoTrack = localStream.getVideoTracks()[0];
@@ -303,7 +382,6 @@ function clearCanvas() {
   }
 }
 
-// Загрузка фото на доску
 function handleBoardImageUpload(e) {
   const file = e.target.files && e.target.files[0];
   if (file && file.type.startsWith('image/')) {
@@ -423,7 +501,6 @@ function deleteChatMessage(msgId) {
   }
 }
 
-// Ввод текста на доску
 function showBigTextModal() {
   const modal = document.getElementById('text-modal');
   if (modal) {
@@ -519,7 +596,6 @@ function loginWithPin() {
     return;
   }
 
-  // 1. Проверка PIN учителя
   if (pin === '20140110' || pin === '01102014' || pin === '01201410') {
     currentRole = 'teacher';
     currentUserName = 'Учитель';
@@ -527,12 +603,10 @@ function loginWithPin() {
     if (teacherSec) teacherSec.style.display = 'block';
     document.getElementById('auth-overlay').style.display = 'none';
     
-    // Перерегистрируем PeerID как учитель
     initializePeerConnection('teacher-room-id');
     return;
   }
 
-  // 2. Проверка ученика в базе
   if (!db) {
     if (errorElement) {
       errorElement.style.display = 'block';
@@ -560,7 +634,6 @@ function loginWithPin() {
       if (teacherSec) teacherSec.style.display = 'none';
       document.getElementById('auth-overlay').style.display = 'none';
       
-      // Перерегистрируем PeerID как ученик
       initializePeerConnection('student-' + foundStudent.name.toLowerCase().replace(/\s+/g, '-'));
     } else {
       if (errorElement) {
