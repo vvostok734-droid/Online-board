@@ -167,13 +167,17 @@ function initVideoDragging() {
 
 async function initVideoConference() {
   try {
+    // Включаем камеру локально сразу, не дожидаясь подключения ученика
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     
     const localVideo = document.getElementById('localVideo');
     if (localVideo) {
       localVideo.srcObject = localStream;
+      localVideo.muted = true; // Отключаем звук для локального элемента, чтобы избежать эха
+      localVideo.play().catch(e => console.warn("Автовоспроизведение локального видео заблокировано:", e));
     }
 
+    // Инициализируем PeerJS для входящих/исходящих вызовов
     initializePeerConnection('student-' + Math.random().toString(36).substring(2, 7));
 
   } catch (error) {
