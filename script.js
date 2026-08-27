@@ -216,23 +216,19 @@ function handleChatFileUpload(e) {
 
   const senderName = currentRole === 'teacher' ? 'Учитель' : currentUserName;
 
-  // Ограничение по размеру для Firebase Realtime DB (опционально, рекомендуется до 2-3 МБ)
+  // Ограничение размера 3 МБ для базы
   if (file.size > 3 * 1024 * 1024) {
-    alert("Файл слишком большой! Для чата подходят файлы до 3 МБ.");
+    alert("Файл слишком большой! Выберите файл до 3 МБ.");
     e.target.value = '';
     return;
   }
 
   const reader = new FileReader();
-  reader.onerror = function() {
-    alert("Ошибка при чтении файла");
-  };
-
+  
   reader.onload = function(event) {
     const base64Data = event.target.result;
     
     if (file.type.startsWith('image/')) {
-      // Картинки предварительно сжимаем
       compressImage(base64Data, 300, 0.5, function(compressedUrl) {
         const msg = {
           sender: senderName,
@@ -244,12 +240,12 @@ function handleChatFileUpload(e) {
         sendChatPayload(msg);
       });
     } else {
-      // Обычные документы (PDF, DOCX, ZIP и т.д.) сохраняем как DataURL
+      // Для PDF и других файлов отправляем payload сразу
       const msg = {
         sender: senderName,
         text: `📎 ${file.name} (${Math.round(file.size / 1024)} KB)`,
         fileName: file.name,
-        fileUrl: base64Data, // <-- передаем сам файл!
+        fileUrl: base64Data,
         isFile: true,
         isImage: false
       };
@@ -257,7 +253,14 @@ function handleChatFileUpload(e) {
     }
   };
 
+  reader.onerror = function() {
+    alert("Ошибка при чтении файла");
+  };
+
+  // Читаем файл как DataURL (Base64)
   reader.readAsDataURL(file);
+  
+  // Сбрасываем input, чтобы можно было выбрать тот же файл повторно
   e.target.value = '';
 }
 
@@ -300,7 +303,7 @@ function addChatMessageToDOM(msg, msgId = null) {
   
   html += `</div>`;
   
-  // Если это изображение
+  // 1. Отображение картинок
   if (msg.isImage && msg.fileUrl) {
     html += `
       <div style="margin-top:6px;">
@@ -308,20 +311,39 @@ function addChatMessageToDOM(msg, msgId = null) {
         <a href="${msg.fileUrl}" download="${msg.fileName || 'image.jpg'}" style="display:inline-block; font-size:12px; color:#a6e3a1; text-decoration:underline;">📥 Скачать картинку</a>
       </div>`;
   } 
-  // Если это файл (PDF, Docx и т.д.)
+  // 2. Отображение файлов (включая PDF)
   else if (msg.isFile && msg.fileUrl) {
-    html += `
-      <div style="margin-top:6px;">
-        <a href="${msg.fileUrl}" download="${msg.fileName || 'file'}" style="display:inline-flex; align-items:center; gap:6px; background:#45475a; color:#a6e3a1; padding:6px 10px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:bold;">
-          📥 Скачать файл
-        </a>
-      </div>`;
+    const isPdf = msg.fileName && msg.fileName.toLowerCase().endsWith('.pdf');
+    
+    if (isPdf) {
+      // Карточка PDF с кнопкой открытия во весь экран
+      html += `
+        <div style="margin-top:8px; background:#181825; padding:10px; border-radius:8px; border:1px solid #313244;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <span style="font-size:22px;">📄</span>
+            <span style="color:#cdd6f4; font-weight:bold; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${msg.fileName || 'Документ PDF'}</span>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button onclick="openPdfModal('${msg.fileUrl}', '${msg.fileName || 'Документ PDF'}')" style="flex:1; background:#89b4fa; color:#11111b; border:none; padding:6px 8px; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer;">🔍 На весь экран</button>
+            <a href="${msg.fileUrl}" download="${msg.fileName || 'document.pdf'}" style="background:#45475a; color:#a6e3a1; padding:6px 10px; border-radius:6px; text-decoration:none; font-size:12px; font-weight:bold; display:inline-flex; align-items:center;">📥 Скачать</a>
+          </div>
+        </div>`;
+    } else {
+      // Для остальных файлов (zip, docx и т.д.)
+      html += `
+        <div style="margin-top:6px;">
+          <a href="${msg.fileUrl}" download="${msg.fileName || 'file'}" style="display:inline-flex; align-items:center; gap:6px; background:#45475a; color:#a6e3a1; padding:6px 10px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:bold;">
+            📥 Скачать файл
+          </a>
+        </div>`;
+    }
   }
   
   div.innerHTML = html;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+
 
 
 function deleteChatMessage(msgId) {
@@ -868,4 +890,42 @@ function initVideoBoxDrag() {
     document.addEventListener('touchmove', doDrag, { passive: true });
     document.addEventListener('touchend', stopDrag);
   }
+}
+// --- ФУНКЦИИ ДЛЯ МОДАЛЬНОГО ОКНА PDF ---
+function openPdfModal(fileUrl, fileName) {
+  const modal = document.getElementById('pdf-modal');
+  const iframe = document.getElementById('pdf-modal-iframe');
+  const title = document.getElementById('pdf-modal-title');
+  
+  if (modal && iframe) {
+    iframe.src = fileUrl;
+    if (title) title.innerText = fileName || 'Просмотр документа';
+    modal.style.display = 'flex';
+  }
+}
+
+function closePdfModal() {
+  const modal = document.getElementById('pdf-modal');
+  const iframe = document.getElementById('pdf-modal-iframe');
+  
+  if (modal) modal.style.display = 'none';
+  if (iframe) iframe.src = ''; // Очищаем iframe, чтобы документ не висел в памяти
+}
+
+// --- ОБНОВЛЕННЫЙ ФРАГМЕНТ addChatMessageToDOM ---
+// Замени ветку "isPdf" в addChatMessageToDOM на эту:
+if (isPdf) {
+  html += `
+    <div style="margin-top:8px;">
+      <div style="position:relative; cursor:pointer;" onclick="openPdfModal('${msg.fileUrl}', '${msg.fileName || 'Документ PDF'}')" title="Кликните для разворачивания">
+        <iframe src="${msg.fileUrl}" style="width:100%; height:200px; border:none; border-radius:6px; pointer-events:none; background:#fff;"></iframe>
+        <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center; border-radius:6px; opacity:0; transition:0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
+          <span style="background:#1e1e2e; color:#89b4fa; padding:8px 14px; border-radius:6px; font-weight:bold; font-size:12px; box-shadow:0 4px 10px rgba(0,0,0,0.4);">🔍 На весь экран</span>
+        </div>
+      </div>
+      <div style="margin-top:6px; display:flex; gap:8px;">
+        <button onclick="openPdfModal('${msg.fileUrl}', '${msg.fileName || 'Документ PDF'}')" style="background:#89b4fa; color:#11111b; border:none; padding:6px 10px; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;">🔍 Развернуть</button>
+        <a href="${msg.fileUrl}" download="${msg.fileName || 'document.pdf'}" style="display:inline-flex; align-items:center; gap:6px; background:#45475a; color:#a6e3a1; padding:6px 10px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:bold;">📥 Скачать</a>
+      </div>
+    </div>`;
 }
