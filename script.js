@@ -216,34 +216,51 @@ function handleChatFileUpload(e) {
 
   const senderName = currentRole === 'teacher' ? 'Учитель' : currentUserName;
 
-  if (file.type.startsWith('image/')) {
-    const reader = new FileReader();
-    reader.onerror = function() {
-      alert("Ошибка при чтении файла");
-    };
-    reader.onload = function(event) {
-      compressImage(event.target.result, 300, 0.5, function(compressedUrl) {
+  // Ограничение по размеру для Firebase Realtime DB (опционально, рекомендуется до 2-3 МБ)
+  if (file.size > 3 * 1024 * 1024) {
+    alert("Файл слишком большой! Для чата подходят файлы до 3 МБ.");
+    e.target.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onerror = function() {
+    alert("Ошибка при чтении файла");
+  };
+
+  reader.onload = function(event) {
+    const base64Data = event.target.result;
+    
+    if (file.type.startsWith('image/')) {
+      // Картинки предварительно сжимаем
+      compressImage(base64Data, 300, 0.5, function(compressedUrl) {
         const msg = {
           sender: senderName,
           text: `📎 ${file.name}`,
+          fileName: file.name,
           fileUrl: compressedUrl,
           isImage: true
         };
         sendChatPayload(msg);
       });
-    };
-    reader.readAsDataURL(file);
-  } else {
-    const msg = {
-      sender: senderName,
-      text: `📎 Файл: ${file.name} (${Math.round(file.size / 1024)} KB)`,
-      isImage: false
-    };
-    sendChatPayload(msg);
-  }
+    } else {
+      // Обычные документы (PDF, DOCX, ZIP и т.д.) сохраняем как DataURL
+      const msg = {
+        sender: senderName,
+        text: `📎 ${file.name} (${Math.round(file.size / 1024)} KB)`,
+        fileName: file.name,
+        fileUrl: base64Data, // <-- передаем сам файл!
+        isFile: true,
+        isImage: false
+      };
+      sendChatPayload(msg);
+    }
+  };
 
+  reader.readAsDataURL(file);
   e.target.value = '';
 }
+
 
 function sendChatPayload(msg) {
   if (db) {
@@ -283,14 +300,29 @@ function addChatMessageToDOM(msg, msgId = null) {
   
   html += `</div>`;
   
+  // Если это изображение
   if (msg.isImage && msg.fileUrl) {
-    html += `<img src="${msg.fileUrl}" style="max-width:100%; border-radius:6px; margin-top:6px; display:block;">`;
+    html += `
+      <div style="margin-top:6px;">
+        <img src="${msg.fileUrl}" style="max-width:100%; border-radius:6px; display:block; margin-bottom:4px;">
+        <a href="${msg.fileUrl}" download="${msg.fileName || 'image.jpg'}" style="display:inline-block; font-size:12px; color:#a6e3a1; text-decoration:underline;">📥 Скачать картинку</a>
+      </div>`;
+  } 
+  // Если это файл (PDF, Docx и т.д.)
+  else if (msg.isFile && msg.fileUrl) {
+    html += `
+      <div style="margin-top:6px;">
+        <a href="${msg.fileUrl}" download="${msg.fileName || 'file'}" style="display:inline-flex; align-items:center; gap:6px; background:#45475a; color:#a6e3a1; padding:6px 10px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:bold;">
+          📥 Скачать файл
+        </a>
+      </div>`;
   }
   
   div.innerHTML = html;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+
 
 function deleteChatMessage(msgId) {
   if (confirm("Удалить это сообщение/файл из чата?")) {
