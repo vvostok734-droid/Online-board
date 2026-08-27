@@ -264,7 +264,6 @@ function handleChatFileUpload(e) {
   e.target.value = '';
 }
 
-
 function sendChatPayload(msg) {
   if (db) {
     try {
@@ -315,36 +314,29 @@ function addChatMessageToDOM(msg, msgId = null) {
   else if (msg.isFile && msg.fileUrl) {
     const isPdf = msg.fileName && msg.fileName.toLowerCase().endsWith('.pdf');
     
-    if (isPdf) {
-      // Карточка PDF с кнопкой открытия во весь экран
-      html += `
-        <div style="margin-top:8px; background:#181825; padding:10px; border-radius:8px; border:1px solid #313244;">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-            <span style="font-size:22px;">📄</span>
-            <span style="color:#cdd6f4; font-weight:bold; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${msg.fileName || 'Документ PDF'}</span>
-          </div>
-          <div style="display:flex; gap:6px;">
-            <button onclick="openPdfModal('${msg.fileUrl}', '${msg.fileName || 'Документ PDF'}')" style="flex:1; background:#89b4fa; color:#11111b; border:none; padding:6px 8px; border-radius:6px; font-size:12px; font-weight:bold; cursor:pointer;">🔍 На весь экран</button>
-            <a href="${msg.fileUrl}" download="${msg.fileName || 'document.pdf'}" style="background:#45475a; color:#a6e3a1; padding:6px 10px; border-radius:6px; text-decoration:none; font-size:12px; font-weight:bold; display:inline-flex; align-items:center;">📥 Скачать</a>
-          </div>
-        </div>`;
-    } else {
-      // Для остальных файлов (zip, docx и т.д.)
-      html += `
-        <div style="margin-top:6px;">
-          <a href="${msg.fileUrl}" download="${msg.fileName || 'file'}" style="display:inline-flex; align-items:center; gap:6px; background:#45475a; color:#a6e3a1; padding:6px 10px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:bold;">
-            📥 Скачать файл
+    html += `
+      <div style="margin-top: 8px; padding: 8px; background: #181825; border-radius: 6px; border: 1px solid #313244;">
+        <div style="font-size: 13px; color: #cdd6f4; margin-bottom: 6px; word-break: break-all;">
+          📄 <b>${msg.fileName || 'Файл'}</b>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          ${isPdf ? `
+            <button type="button" onclick="openPdfModal('${msg.fileUrl}', '${msg.fileName || 'Документ PDF'}')" style="background: #b4befe; color: #11111b; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+              🔍 Просмотр
+            </button>
+          ` : ''}
+          <a href="${msg.fileUrl}" download="${msg.fileName || 'file'}" style="background: #a6e3a1; color: #11111b; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
+            💾 Скачать
           </a>
-        </div>`;
-    }
+        </div>
+      </div>
+    `;
   }
   
   div.innerHTML = html;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
-
-
 
 function deleteChatMessage(msgId) {
   if (confirm("Удалить это сообщение/файл из чата?")) {
@@ -522,7 +514,6 @@ function loginWithPin() {
     }
   });
 }
-
 
 function logout() {
   document.getElementById('auth-overlay').style.display = 'flex';
@@ -719,30 +710,13 @@ function initPeerJS() {
   const peerConfig = {
     config: {
       iceServers: [
-        // Публичные STUN-серверы Google (работают всегда и бесплатно)
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-        
-        /* 
-        // Если нужен 100% пробой через агрессивный мобильный 4G/5G,
-        // зарегистрируйся на metered.ca (10 GB/мес бесплатно) и вставь свои данные:
-        {
-          urls: "turn:openrelay.metered.ca:80",
-          username: "твой_username",
-          credential: "твой_password"
-        },
-        {
-          urls: "turn:openrelay.metered.ca:443",
-          username: "твой_username",
-          credential: "твой_password"
-        }
-        */
+        { urls: 'stun:stun2.l.google.com:19302' }
       ]
     }
   };
 
-  // Передаем настройки прямо в PeerJS
   peer = new Peer(myPeerId, peerConfig);
 
   peer.on('open', (id) => {
@@ -776,7 +750,6 @@ function initPeerJS() {
     console.error("PeerJS ошибка:", err);
   });
 }
-
 
 function startCall() {
   navigator.mediaDevices.getUserMedia({ video: true, audio: true })
@@ -891,6 +864,7 @@ function initVideoBoxDrag() {
     document.addEventListener('touchend', stopDrag);
   }
 }
+
 // --- ФУНКЦИИ ДЛЯ МОДАЛЬНОГО ОКНА PDF ---
 function openPdfModal(fileUrl, fileName) {
   const modal = document.getElementById('pdf-modal');
@@ -911,21 +885,4 @@ function closePdfModal() {
   if (modal) modal.style.display = 'none';
   if (iframe) iframe.src = ''; // Очищаем iframe, чтобы документ не висел в памяти
 }
-
-// --- ОБНОВЛЕННЫЙ ФРАГМЕНТ addChatMessageToDOM ---
-// Замени ветку "isPdf" в addChatMessageToDOM на эту:
-if (isPdf) {
-  html += `
-    <div style="margin-top:8px;">
-      <div style="position:relative; cursor:pointer;" onclick="openPdfModal('${msg.fileUrl}', '${msg.fileName || 'Документ PDF'}')" title="Кликните для разворачивания">
-        <iframe src="${msg.fileUrl}" style="width:100%; height:200px; border:none; border-radius:6px; pointer-events:none; background:#fff;"></iframe>
-        <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center; border-radius:6px; opacity:0; transition:0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
-          <span style="background:#1e1e2e; color:#89b4fa; padding:8px 14px; border-radius:6px; font-weight:bold; font-size:12px; box-shadow:0 4px 10px rgba(0,0,0,0.4);">🔍 На весь экран</span>
-        </div>
-      </div>
-      <div style="margin-top:6px; display:flex; gap:8px;">
-        <button onclick="openPdfModal('${msg.fileUrl}', '${msg.fileName || 'Документ PDF'}')" style="background:#89b4fa; color:#11111b; border:none; padding:6px 10px; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;">🔍 Развернуть</button>
-        <a href="${msg.fileUrl}" download="${msg.fileName || 'document.pdf'}" style="display:inline-flex; align-items:center; gap:6px; background:#45475a; color:#a6e3a1; padding:6px 10px; border-radius:6px; text-decoration:none; font-size:13px; font-weight:bold;">📥 Скачать</a>
-      </div>
-    </div>`;
-}
+  
