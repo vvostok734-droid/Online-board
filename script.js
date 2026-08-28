@@ -1,4 +1,4 @@
-// Конфигурация Firebase
+
 const firebaseConfig = {
   databaseURL: "https://online-board-5ad8c-default-rtdb.firebaseio.com/" // <-- Твой URL базы
 };
@@ -23,7 +23,7 @@ let currentColor = '#000000';
 let currentLineWidth = 4;
 let isEraser = false;
 
-// PeerJS переменные
+
 let peer = null;
 let localStream = null;
 let currentCall = null;
@@ -37,13 +37,13 @@ document.addEventListener('DOMContentLoaded', () => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // События мыши для рисования
+    
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseleave', stopDrawing);
 
-    // События тачскрина для рисования
+    
     canvas.addEventListener('touchstart', startDrawingTouch, { passive: false });
     canvas.addEventListener('touchmove', drawTouch, { passive: false });
     canvas.addEventListener('touchend', stopDrawing);
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Настройка перетаскивания плавающего видео-блока (Мышь + Сенсор)
+  
   initVideoBoxDrag();
 
   if (db) {
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Сохранение рисунка при изменении размера экрана
+
 function resizeCanvas() {
   const container = document.getElementById('canvas-container');
   if (!container || !canvas) return;
@@ -172,7 +172,7 @@ function clearCanvas() {
   }
 }
 
-// Загрузка фото на доску
+
 function handleBoardImageUpload(e) {
   const file = e.target.files && e.target.files[0];
   if (file && file.type.startsWith('image/')) {
@@ -193,7 +193,7 @@ function handleBoardImageUpload(e) {
 }
 
 // ==========================================
-// --- ОТПРАВКА, ОТОБРАЖЕНИЕ И ЧТЕНИЕ ЧАТА ---
+// --
 // ==========================================
 
 function sendChatMessage() {
@@ -240,7 +240,7 @@ function handleChatFileUpload(e) {
         sendChatPayload(msg);
       });
     } else {
-      // Для PDF и других файлов отправляем payload сразу
+      
       const msg = {
         sender: senderName,
         text: `📎 ${file.name} (${Math.round(file.size / 1024)} KB)`,
@@ -641,7 +641,7 @@ function logout() {
 }
 
 // ==========================================
-// --- ПАНЕЛЬ УПРАВЛЕНИЯ УЧЕНИКАМИ ---
+// --- ---
 // ==========================================
 
 function showAdminModal() {
