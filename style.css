@@ -224,3 +224,53 @@ body {
   width: 90%;
   max-width: 360px;
 }
+#video-container {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  z-index: 15; /* подняли выше холста, но ниже чата */
+}
+
+#video-container:active {
+  cursor: grabbing;
+}
+#top-bar button:hover,
+.auth-box button:hover,
+.chat-send-btn:hover,
+.chat-attach-btn:hover {
+  filter: brightness(1.15);
+}
+
+#top-bar button:active,
+.auth-box button:active,
+.chat-send-btn:active,
+.chat-attach-btn:active {
+  transform: scale(0.97);
+}
+/* Контейнер элементов доски */
+.board-item {
+  position: absolute;
+  user-select: none;
+  touch-action: none;
+  box-sizing: border-box;
+}
+
+/* Рамка при наведении или выборе */
+.board-item:hover {
+  outline: 2px dashed #89b4fa;
+}
+
+/* Маркер для изменения размера (уголок в правом нижнем углу) */
+.resize-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background-color: #89b4fa;
+  border: 2px solid #11111b;
+  border-radius: 50%;
+  right: -7px;
+  bottom: -7px;
+  cursor: nwse-resize;
+  touch-action: none;
+  z-index: 60;
+}
