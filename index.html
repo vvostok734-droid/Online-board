@@ -9,11 +9,11 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
-  <!-- Подключаем PeerJS для видео и звуковой связи WebRTC -->
+  
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
   <style>
-    /* Стили плавающего видео-блока */
+    
     #video-conference-box {
       position: fixed;
       bottom: 20px;
@@ -128,7 +128,7 @@
     </div>
   </div>
 
-  <!-- МОДАЛКА ТЕКСТА -->
+  
   <div id="text-modal" style="display:none;">
     <div class="modal-box">
       <h3 style="color:#cba6f7; margin-bottom:10px;">📄 Текст на доску</h3>
@@ -140,12 +140,12 @@
     </div>
   </div>
 
-  <!-- МОДАЛКА УПРАВЛЕНИЯ УЧЕНИКАМИ (ПАНЕЛЬ УЧИТЕЛЯ) -->
+  
   <div id="admin-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999; justify-content:center; align-items:center;">
     <div class="modal-box" style="background:#1e1e2e; color:#cdd6f4; padding:20px; border-radius:12px; width:90%; max-width:550px; max-height:85vh; overflow-y:auto; border:1px solid #45475a;">
       <h3 style="color:#b4befe; margin-bottom:15px; text-align:center;">👥 Управление учениками</h3>
       
-      <!-- Форма добавления до 5 учеников -->
+      
       <div style="background:#181825; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #313244;">
         <h4 style="color:#a6e3a1; margin-bottom:10px;">➕ Добавить учеников (до 5 одновременно)</h4>
         <div id="addStudentsContainer">
@@ -173,7 +173,7 @@
         <button type="button" onclick="saveBatchStudents()" style="width:100%; margin-top:8px; padding:8px; background:#a6e3a1; color:#11111b; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">Сохранить новых учеников</button>
       </div>
 
-      <!-- Список существующих учеников -->
+      
       <h4 style="color:#89b4fa; margin-bottom:8px;">📋 Список учеников</h4>
       <div id="adminStudentsList" style="max-height:200px; overflow-y:auto; margin-bottom:15px;">
         <!-- Динамически заполняется через JS -->
@@ -183,7 +183,7 @@
     </div>
   </div>
 
-  <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
+  
   <div id="top-bar">
     <div class="top-section">
       <button type="button" onclick="setPen()">✏️ Кисть</button>
@@ -201,7 +201,7 @@
       <button type="button" onclick="showBigTextModal()" style="background:#cba6f7; color:#11111b; font-weight:bold;">📄 Написать текст</button>
     </div>
 
-    <!-- Кнопка видна только учителю -->
+    
     <div class="top-section" id="teacherSection" style="display:none;">
       <button type="button" onclick="showAdminModal()" style="background:#b4befe; color:#11111b; font-weight:bold;">👥 Панель учеников</button>
     </div>
@@ -212,14 +212,14 @@
     </div>
   </div>
 
-  <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
+  
   <div id="main-container">
     <div id="canvas-container">
       <div id="board-word-list"></div>
       <canvas id="paintBoard"></canvas>
     </div>
 
-    <!-- ЧАТ С ПРЯМЫМИ ОБРАБОТЧИКАМИ -->
+    
     <div id="side-panel">
       <div class="side-column">
         <h4 id="panelTitle">Чат урока</h4>
@@ -236,7 +236,7 @@
     </div>
   </div>
 
-  <!-- ПЛАВАЮЩИЙ БЛОК ВИДЕОСВЯЗИ (Учитель + Ученик) -->
+  
   <div id="video-conference-box">
     <div class="video-header" id="videoHeader">🎥 Видеосвязь (тяни заголовок)</div>
     <div class="video-viewport">
@@ -252,7 +252,7 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО ДЛЯ ПОЛНОЭКРАННОГО ПРОСМОТРА PDF -->
+  
   <div id="pdf-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
     <div style="width:90%; height:90%; background:#1e1e2e; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
       <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 20px; background:#181825; border-bottom:1px solid #313244;">
