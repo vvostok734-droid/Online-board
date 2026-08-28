@@ -389,7 +389,19 @@ function addItemToBoardDOM(item) {
   elem.style.zIndex = '50';
 
   if (item.type === 'image') {
-    elem.innerHTML = `<img src="${item.content}" style="max-width:220px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.4);">`;
+    const img = document.createElement('img');
+    img.src = item.content;
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'contain';
+    img.style.borderRadius = '8px';
+    img.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+    img.style.pointerEvents = 'none'; // Чтобы мышь не перехватывалась самой картинкой
+    elem.appendChild(img);
+    
+    // Начальные размеры для картинки
+    elem.style.width = item.width ? item.width + 'px' : '220px';
+    if (item.height) elem.style.height = item.height + 'px';
   } else {
     elem.innerText = item.content;
     elem.style.background = '#89b4fa';
@@ -402,7 +414,111 @@ function addItemToBoardDOM(item) {
     elem.style.whiteSpace = 'pre-wrap';
   }
 
+  // Создаем ручку (маркер) для растягивания
+  const handle = document.createElement('div');
+  handle.className = 'resize-handle';
+  elem.appendChild(handle);
+
   listContainer.appendChild(elem);
+
+  // Подключаем перетаскивание и изменение размера (Мышь + Touch)
+  makeElementInteractive(elem, handle, item);
+}
+
+// Функция интерактивности: перемещение и масштабирование
+function makeElementInteractive(elem, handle, item) {
+  let isDragging = false;
+  let isResizing = false;
+  let startX, startY, startWidth, startHeight, startLeft, startTop;
+
+  // --- 1. ПЕРЕМЕЩЕНИЕ (Drag) ---
+  const onDragStart = (e) => {
+    if (e.target === handle) return; // Если кликнули по маркеру — не перетаскиваем
+    isDragging = true;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    startX = clientX - elem.offsetLeft;
+    startY = clientY - elem.offsetTop;
+  };
+
+  const onDragMove = (e) => {
+    if (!isDragging) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    elem.style.left = (clientX - startX) + 'px';
+    elem.style.top = (clientY - startY) + 'px';
+  };
+
+  const onDragEnd = () => {
+    if (isDragging) {
+      isDragging = false;
+      // Если есть Firebase — сохраняем новые координаты
+      if (db && item.id) {
+        db.ref(`board/items/${item.id}`).update({
+          x: parseInt(elem.style.left),
+          y: parseInt(elem.style.top)
+        });
+      }
+    }
+  };
+
+  // --- 2. ИЗМЕНЕНИЕ РАЗМЕРА (Resize) ---
+  const onResizeStart = (e) => {
+    e.stopPropagation(); // Отменяем всплытие, чтобы не срабатывал drag
+    isResizing = true;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    startX = clientX;
+    startY = clientY;
+    startWidth = elem.offsetWidth;
+    startHeight = elem.offsetHeight;
+  };
+
+  const onResizeMove = (e) => {
+    if (!isResizing) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    const newWidth = Math.max(50, startWidth + (clientX - startX));
+    const newHeight = Math.max(50, startHeight + (clientY - startY));
+
+    elem.style.width = newWidth + 'px';
+    elem.style.height = newHeight + 'px';
+  };
+
+  const onResizeEnd = () => {
+    if (isResizing) {
+      isResizing = false;
+      // Сохраняем размеры в Firebase
+      if (db && item.id) {
+        db.ref(`board/items/${item.id}`).update({
+          width: parseInt(elem.style.width),
+          height: parseInt(elem.style.height)
+        });
+      }
+    }
+  };
+
+  // События для перетаскивания (Элемент)
+  elem.addEventListener('mousedown', onDragStart);
+  window.addEventListener('mousemove', onDragMove);
+  window.addEventListener('mouseup', onDragEnd);
+
+  elem.addEventListener('touchstart', onDragStart, { passive: false });
+  window.addEventListener('touchmove', onDragMove, { passive: false });
+  window.addEventListener('touchend', onDragEnd);
+
+  // События для изменения размера (Маркер)
+  handle.addEventListener('mousedown', onResizeStart);
+  window.addEventListener('mousemove', onResizeMove);
+  window.addEventListener('mouseup', onResizeEnd);
+
+  handle.addEventListener('touchstart', onResizeStart, { passive: false });
+  window.addEventListener('touchmove', onResizeMove, { passive: false });
+  window.addEventListener('touchend', onResizeEnd);
 }
 
 // Быстрое сжатие изображений
