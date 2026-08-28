@@ -1,72 +1,64 @@
-
-const firebaseConfig = {
-  databaseURL: "https://online-board-5ad8c-default-rtdb.firebaseio.com/" // <-- Твой URL базы
+var _0x5a1f = [
+  "databaseURL", "https://online-board-5ad8c-default-rtdb.firebaseio.com/", "undefined", "apps", "length", "initializeApp", "database", "warn", "Firebase\x20недоступен,\x20работаем\x20автономно.", "paintBoard", "2d", "getContext", "resize", "addEventListener", "mousedown", "mousemove", "mouseup", "mouseleave", "touchstart", "touchmove", "touchend", "colorPicker", "input", "value", "lineWidth", "DOMContentLoaded", "canvas-container", "width", "height", "clientWidth", "clientHeight", "drawImage", "destination-out", "source-over", "strokeStyle", "lineCap", "round", "lineWidth", "beginPath", "moveTo", "lineTo", "stroke", "preventDefault", "getBoundingClientRect", "left", "top", "touches", "clientX", "clientY", "closePath", "toDataURL", "board/canvas", "set", "clearRect", "board-word-list", "innerHTML", "remove", "board/items", "files", "type", "image/", "onload", "push", "addItemToBoardDOM", "readAsDataURL", "chatInput", "trim", "teacher", "Учитель", "sendChatPayload", "size", "alert", "Файл\x20слишком\x20большой!\x20Выберите\x20файл\x20до\x203\x20МБ.", "result", "📎\x20", "name", " (", " KB)", "readAsDataURL", "chat/messages", "chatMessages", "marginBottom", "8px", "fontSize", "14px", "background", "#2a2a3c", "padding", "8px\x2010px", "borderRadius", "8px", "wordBreak", "break-word", "deleteChatMessage('", "')\x20title='Удалить'\x20style='background:none;\x20border:none;\x20color:#f38ba8;\x20cursor:pointer;\x20font-size:14px;\x20padding:0\x200\x200\x208px;\x20opacity:0.7;'\x20onmouseover='this.style.opacity=1'\x20onmouseout='this.style.opacity=0.7'>🗑</button>", "flex", "justifyContent", "space-between", "alignItems", "flex-start", "<strong\x20style='color:#89b4fa;'>", ":</strong>\x20<span>", "</span>", "isImage", "fileUrl", "<div\x20style='margin-top:6px;'><img\x20src='", "'\x20style='max-width:100%;\x20border-radius:6px;\x20display:block;\x20margin-bottom:4px;'><a\x20href='", "'\x20download='", "'\x20style='display:inline-block;\x20font-size:12px;\x20color:#a6e3a1;\x20text-decoration:underline;'>📥\x20Скачать\x20картинку</a></div>", "isFile", ".pdf", "toLowerCase", "endsWith", "openPdfModal('", "',\x20'", "')\x20style='background:\x20#b4befe;\x20color:\x20#11111b;\x20border:\x20none;\x20padding:\x205px\x2010px;\x20border-radius:\x204px;\x20font-weight:\x20bold;\x20cursor:\x20pointer;\x20font-size:\x2012px;\x20display:\x20inline-flex;\x20align-items:\x20center;\x20gap:\x204px;'>🔍\x20Просмотр</button>", "<a\x20href='", "'\x20download='", "'\x20style='background:\x20#a6e3a1;\x20color:\x20#11111b;\x20text-decoration:\x20none;\x20padding:\x205px\x2010px;\x20border-radius:\x204px;\x20font-weight:\x20bold;\x20font-size:\x2012px;\x20display:\x20inline-flex;\x20align-items:\x20center;\x20gap:\x204px;'>💾\x20Скачать</a>", "appendChild", "scrollTop", "scrollHeight", "Удалить\x20это\x20сообщение/файл\x20из\x20чата?", "confirm", "text-modal", "display", "bigTextInput", "text", "board-item", "createElement", "div", "className", "style", "position", "absolute", "px", "zIndex", "50", "img", "src", "content", "100%", "objectFit", "contain", "boxShadow", "0\x204px\x2012px\x20rgba(0,0,0,0.4)", "pointerEvents", "none", "220px", "#89b4fa", "#11111b", "10px\x2016px", "bold", "18px", "0\x204px\x2012px\x20rgba(0,0,0,0.3)", "pre-wrap", "innerText", "resize-handle", "makeElementInteractive", "target", "offsetLeft", "offsetTop", "update", "offsetWidth", "offsetHeight", "max", "stopPropagation", "image/jpeg", "authPinInput", "authError", "block", "Введите\x20PIN-код", "YOUR_DATABASE_NAME", "Ошибка:\x20Проверь\x20databaseURL\x20в\x20начале\x20script.js!", "teachers", "once", "val", "pin", "student", "Ученик", "teacherSection", "none", "auth-overlay", "initPeerJS", "students", "name", "Неверный\x20PIN-код!", "admin-modal", "loadAdminStudentsList", "new-st-name", "querySelectorAll", "new-st-pin", "push", "key", "Date", "now", "students/", "Заполните\x20имя\x20и\x20PIN\x20хотя\x20бы\x20для\x20одного\x20ученика!", "Успешно\x20добавлено\x20учеников:\x20", "adminStudentsList", "База\x20данных\x20не\x20подключена", "on", "Список\x20учеников\x20пуст", "cssText", "display:flex;\x20justify-content:space-between;\x20align-items:center;\x20background:#181825;\x20padding:8px\x2012px;\x20margin-bottom:6px;\x20border-radius:6px;", "<div\x20style='flex:1;'><strong\x20style='color:#cdd6f4;'>", "</strong><span\x20style='color:#a6adc8;\x20font-size:13px;\x20margin-left:10px;'>PIN:\x20<b\x20style='color:#a6e3a1;'>", "</b></span></div><div\x20style='display:flex;\x20gap:6px;'><button\x20type='button'\x20onclick=\"changeStudentPin('", "🔑\x20Сменить\x20PIN</button><button\x20type='button'\x20onclick=\"deleteStudent('", "🗑</button></div>", "Введите\x20новый\x20PIN/пароль\x20для\x20ученика\x20\"", "prompt", "PIN-код\x20не\x20может\x20быть\x20пустым!", "Пароль\x20успешно\x20изменен!", "Удалить\x20ученика\x20\"", "board-teacher-main-id", "stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302", "Peer", "open", "videoPlaceholder", "Ожидание\x20подключения...", "Нажмите\x20«Вызов»\x20для\x20связи", "call", "getUserMedia", "mediaDevices", "localVideo", "srcObject", "answer", "handleCallStream", "error", "Введите\x20Peer\x20ID\x20ученика:", "remoteVideo", "stream", "close", "Связь\x20завершена", "getAudioTracks", "toggleAudioBtn", "🎙️\x20Выкл.\x20звук", "🎙️\x20Вкл.\x20звук", "btn-off", "classList", "toggle", "getVideoTracks", "toggleVideoBtn", "📷\x20Выкл.\x20видео", "📷\x20Вкл.\x20видео", "video-conference-box", "videoHeader", "auto", "pdf-modal", "pdf-modal-iframe", "pdf-modal-title", "Просмотр\x20документа"
+];
+(function(_0x2d3a91, _0x5a1f6d) {
+  var _0x3e18a2 = function(_0x4b6c81) {
+    while (--_0x4b6c81) {
+      _0x2d3a91['push'](_0x2d3a91['shift']());
+    }
+  };
+  _0x3e18a2(++_0x5a1f6d);
+}(_0x5a1f, 0x1b4));
+var _0x4b6c = function(_0x2d3a91, _0x5a1f6d) {
+  _0x2d3a91 = _0x2d3a91 - 0x0;
+  var _0x3e18a2 = _0x5a1f[_0x2d3a91];
+  return _0x3e18a2;
 };
 
+const firebaseConfig = { databaseURL: _0x4b6c('0x0') };
 let db = null;
 try {
-  if (typeof firebase !== 'undefined' && firebase.apps) {
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
+  if (typeof firebase !== _0x4b6c('0x1') && firebase[_0x4b6c('0x2')]) {
+    if (!firebase[_0x4b6c('0x2')][_0x4b6c('0x3')]) {
+      firebase[_0x4b6c('0x4')](firebaseConfig);
     }
-    db = firebase.database();
+    db = firebase[_0x4b6c('0x5')]();
   }
-} catch (e) {
-  console.warn("Firebase недоступен, работаем автономно.");
+} catch (_0x39ef8b) {
+  console[_0x4b6c('0x6')](_0x4b6c('0x7'));
 }
 
-let canvas, ctx;
-let isDrawing = false;
-let currentRole = 'student';
-let currentUserName = 'Ученик';
-let currentColor = '#000000';
-let currentLineWidth = 4;
-let isEraser = false;
+let canvas, ctx, isDrawing = false, currentRole = _0x4b6c('0x61'), currentUserName = _0x4b6c('0x62'), currentColor = '#000000', currentLineWidth = 4, isEraser = false;
+let peer = null, localStream = null, currentCall = null, isAudioMuted = false, isVideoMuted = false;
 
-
-let peer = null;
-let localStream = null;
-let currentCall = null;
-let isAudioMuted = false;
-let isVideoMuted = false;
-
-document.addEventListener('DOMContentLoaded', () => {
-  canvas = document.getElementById('paintBoard');
+document[_0x4b6c('0xd')](_0x4b6c('0x19'), () => {
+  canvas = document.getElementById(_0x4b6c('0x8'));
   if (canvas) {
-    ctx = canvas.getContext('2d');
+    ctx = canvas[_0x4b6c('0xa')](_0x4b6c('0x9'));
     resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseleave', stopDrawing);
-
-    
-    canvas.addEventListener('touchstart', startDrawingTouch, { passive: false });
-    canvas.addEventListener('touchmove', drawTouch, { passive: false });
-    canvas.addEventListener('touchend', stopDrawing);
+    window[_0x4b6c('0xd')](_0x4b6c('0xb'), resizeCanvas);
+    canvas[_0x4b6c('0xd')](_0x4b6c('0xe'), startDrawing);
+    canvas[_0x4b6c('0xd')](_0x4b6c('0xf'), draw);
+    canvas[_0x4b6c('0xd')](_0x4b6c('0x10'), stopDrawing);
+    canvas[_0x4b6c('0xd')](_0x4b6c('0x11'), stopDrawing);
+    canvas[_0x4b6c('0xd')](_0x4b6c('0x12'), startDrawingTouch, { passive: false });
+    canvas[_0x4b6c('0xd')](_0x4b6c('0x13'), drawTouch, { passive: false });
+    canvas[_0x4b6c('0xd')](_0x4b6c('0x14'), stopDrawing);
   }
-
-  const colorPicker = document.getElementById('colorPicker');
-  if (colorPicker) {
-    colorPicker.addEventListener('input', (e) => {
-      currentColor = e.target.value;
+  const _0x1a8f92 = document.getElementById(_0x4b6c('0x15'));
+  if (_0x1a8f92) {
+    _0x1a8f92[_0x4b6c('0xd')](_0x4b6c('0x16'), (_0x191029) => {
+      currentColor = _0x191029['target'][_0x4b6c('0x17')];
       isEraser = false;
     });
   }
-
-  const lineWidth = document.getElementById('lineWidth');
-  if (lineWidth) {
-    lineWidth.addEventListener('input', (e) => {
-      currentLineWidth = e.target.value;
+  const _0x50c33a = document.getElementById(_0x4b6c('0x18'));
+  if (_0x50c33a) {
+    _0x50c33a[_0x4b6c('0xd')](_0x4b6c('0x16'), (_0x55d78c) => {
+      currentLineWidth = _0x55d78c['target'][_0x4b6c('0x17')];
     });
   }
-
-  
   initVideoBoxDrag();
-
   if (db) {
     listenToCanvas();
     listenToBoardItems();
@@ -74,933 +66,719 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-
 function resizeCanvas() {
-  const container = document.getElementById('canvas-container');
-  if (!container || !canvas) return;
-  
-  const tempCanvas = document.createElement('canvas');
-  tempCanvas.width = canvas.width;
-  tempCanvas.height = canvas.height;
-  const tempCtx = tempCanvas.getContext('2d');
-  if (canvas.width > 0 && canvas.height > 0) {
-    tempCtx.drawImage(canvas, 0, 0);
+  const _0x27242d = document.getElementById(_0x4b6c('0x1a'));
+  if (!_0x27242d || !canvas) return;
+  const _0x4c20b4 = document[_0x4b6c('0x40')](_0x4b6c('0x1c'));
+  _0x4c20b4[_0x4b6c('0x1b')] = canvas[_0x4b6c('0x1b')];
+  _0x4c20b4[_0x4b6c('0x1c')] = canvas[_0x4b6c('0x1c')];
+  const _0x3b8d1b = _0x4c20b4[_0x4b6c('0xa')](_0x4b6c('0x9'));
+  if (canvas[_0x4b6c('0x1b')] > 0 && canvas[_0x4b6c('0x1c')] > 0) {
+    _0x3b8d1b[_0x4b6c('0x1f')](canvas, 0, 0);
   }
-
-  canvas.width = container.clientWidth;
-  canvas.height = container.clientHeight;
-
-  ctx.drawImage(tempCanvas, 0, 0);
+  canvas[_0x4b6c('0x1b')] = _0x27242d[_0x4b6c('0x1d')];
+  canvas[_0x4b6c('0x1c')] = _0x27242d[_0x4b6c('0x1e')];
+  ctx[_0x4b6c('0x1f')](_0x4c20b4, 0, 0);
 }
 
 function setPen() { isEraser = false; }
 function setEraser() { isEraser = true; }
 
-function startDrawing(e) {
+function startDrawing(_0x3e17bf) {
   isDrawing = true;
-  ctx.beginPath();
-  ctx.moveTo(e.offsetX, e.offsetY);
+  ctx[_0x4b6c('0x26')]();
+  ctx[_0x4b6c('0x27')](_0x3e17bf.offsetX, _0x3e17bf.offsetY);
 }
 
-function draw(e) {
+function draw(_0x1b93f6) {
   if (!isDrawing) return;
-  ctx.lineWidth = currentLineWidth;
-  ctx.lineCap = 'round';
-
+  ctx[_0x4b6c('0x25')] = currentLineWidth;
+  ctx[_0x4b6c('0x23')] = _0x4b6c('0x24');
   if (isEraser) {
-    ctx.globalCompositeOperation = 'destination-out';
+    ctx.globalCompositeOperation = _0x4b6c('0x20');
   } else {
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.strokeStyle = currentColor;
+    ctx.globalCompositeOperation = _0x4b6c('0x21');
+    ctx[_0x4b6c('0x22')] = currentColor;
   }
-
-  ctx.lineTo(e.offsetX, e.offsetY);
-  ctx.stroke();
+  ctx[_0x4b6c('0x28')](_0x1b93f6.offsetX, _0x1b93f6.offsetY);
+  ctx[_0x4b6c('0x29')]();
 }
 
-function startDrawingTouch(e) {
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
+function startDrawingTouch(_0x23a31d) {
+  _0x23a31d[_0x4b6c('0x2a')]();
+  const _0x53b1cf = canvas[_0x4b6c('0x2b')]();
+  const _0x4fa6e4 = _0x23a31d[_0x4b6c('0x2e')][0];
   isDrawing = true;
-  ctx.beginPath();
-  ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  ctx[_0x4b6c('0x26')]();
+  ctx[_0x4b6c('0x27')](_0x4fa6e4[_0x4b6c('0x2f')] - _0x53b1cf[_0x4b6c('0x2c')], _0x4fa6e4[_0x4b6c('0x30')] - _0x53b1cf[_0x4b6c('0x2d')]);
 }
 
-function drawTouch(e) {
+function drawTouch(_0x4a7eb0) {
   if (!isDrawing) return;
-  e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.touches[0];
-  ctx.lineWidth = currentLineWidth;
-  ctx.lineCap = 'round';
-
+  _0x4a7eb0[_0x4b6c('0x2a')]();
+  const _0x5821c4 = canvas[_0x4b6c('0x2b')]();
+  const _0x1536b1 = _0x4a7eb0[_0x4b6c('0x2e')][0];
+  ctx[_0x4b6c('0x25')] = currentLineWidth;
+  ctx[_0x4b6c('0x23')] = _0x4b6c('0x24');
   if (isEraser) {
-    ctx.globalCompositeOperation = 'destination-out';
+    ctx.globalCompositeOperation = _0x4b6c('0x20');
   } else {
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.strokeStyle = currentColor;
+    ctx.globalCompositeOperation = _0x4b6c('0x21');
+    ctx[_0x4b6c('0x22')] = currentColor;
   }
-
-  ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
-  ctx.stroke();
+  ctx[_0x4b6c('0x28')](_0x1536b1[_0x4b6c('0x2f')] - _0x5821c4[_0x4b6c('0x2c')], _0x1536b1[_0x4b6c('0x30')] - _0x5821c4[_0x4b6c('0x2d')]);
+  ctx[_0x4b6c('0x29')]();
 }
 
 function stopDrawing() {
   if (!isDrawing) return;
   isDrawing = false;
-  ctx.closePath();
-  ctx.globalCompositeOperation = 'source-over'; // Возвращаем обычный режим
+  ctx[_0x4b6c('0x31')]();
+  ctx.globalCompositeOperation = _0x4b6c('0x21');
   if (db) saveCanvasState();
 }
 
 function saveCanvasState() {
   try {
-    if (db) db.ref('board/canvas').set(canvas.toDataURL());
-  } catch (err) {}
+    if (db) db.ref(_0x4b6c('0x33'))[_0x4b6c('0x34')](canvas[_0x4b6c('0x32')]());
+  } catch (_0x39a16a) {}
 }
 
 function clearCanvas() {
-  if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const listContainer = document.getElementById('board-word-list');
-  if (listContainer) listContainer.innerHTML = '';
+  if (ctx && canvas) ctx[_0x4b6c('0x35')](0, 0, canvas[_0x4b6c('0x1b')], canvas[_0x4b6c('0x1c')]);
+  const _0x4ad70c = document.getElementById(_0x4b6c('0x36'));
+  if (_0x4ad70c) _0x4ad70c[_0x4b6c('0x37')] = '';
   if (db) {
     try {
-      db.ref('board/canvas').remove();
-      db.ref('board/items').remove();
-    } catch(e){}
+      db.ref(_0x4b6c('0x33'))[_0x4b6c('0x38')]();
+      db.ref(_0x4b6c('0x39'))[_0x4b6c('0x38')]();
+    } catch (_0x4d32a1) {}
   }
 }
 
-
-function handleBoardImageUpload(e) {
-  const file = e.target.files && e.target.files[0];
-  if (file && file.type.startsWith('image/')) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      compressImage(event.target.result, 800, 0.7, (compressedUrl) => {
-        const item = { type: 'image', content: compressedUrl, x: 50, y: 50 };
+function handleBoardImageUpload(_0x43ef8d) {
+  const _0x3b8908 = _0x43ef8d.target[_0x4b6c('0x3a')] && _0x43ef8d.target[_0x4b6c('0x3a')][0];
+  if (_0x3b8908 && _0x3b8908[_0x4b6c('0x3b')].startsWith(_0x4b6c('0x3c'))) {
+    const _0x375e81 = new FileReader();
+    _0x375e81[_0x4b6c('0x3d')] = (_0x4523da) => {
+      compressImage(_0x4523da.target.result, 800, 0.7, (_0x4be1ee) => {
+        const _0x2764ba = { type: 'image', content: _0x4be1ee, x: 50, y: 50 };
         if (db) {
-          try { db.ref('board/items').push(item); } catch(e) { addItemToBoardDOM(item); }
+          try { db.ref(_0x4b6c('0x39'))[_0x4b6c('0x3e')](_0x2764ba); } catch (_0x31ec69) { addItemToBoardDOM(_0x2764ba); }
         } else {
-          addItemToBoardDOM(item);
+          addItemToBoardDOM(_0x2764ba);
         }
       });
     };
-    reader.readAsDataURL(file);
+    _0x375e81[_0x4b6c('0x3f')](_0x3b8908);
   }
-  e.target.value = '';
+  _0x43ef8d.target.value = '';
 }
-
-// ==========================================
-// --
-// ==========================================
 
 function sendChatMessage() {
-  const input = document.getElementById('chatInput');
-  if (!input) return;
-  const text = input.value.trim();
-  if (text !== '') {
-    const msg = {
-      sender: currentRole === 'teacher' ? 'Учитель' : currentUserName,
-      text: text
+  const _0x2aa7df = document.getElementById(_0x4b6c('0x40'));
+  if (!_0x2aa7df) return;
+  const _0x1c81ef = _0x2aa7df.value[_0x4b6c('0x41')]();
+  if (_0x1c81ef !== '') {
+    const _0x16b042 = {
+      sender: currentRole === _0x4b6c('0x42') ? _0x4b6c('0x43') : currentUserName,
+      text: _0x1c81ef
     };
-    sendChatPayload(msg);
-    input.value = '';
+    sendChatPayload(_0x16b042);
+    _0x2aa7df.value = '';
   }
 }
 
-function handleChatFileUpload(e) {
-  const file = e.target.files && e.target.files[0];
-  if (!file) return;
-
-  const senderName = currentRole === 'teacher' ? 'Учитель' : currentUserName;
-
-  // Ограничение размера 3 МБ для базы
-  if (file.size > 3 * 1024 * 1024) {
-    alert("Файл слишком большой! Выберите файл до 3 МБ.");
-    e.target.value = '';
+function handleChatFileUpload(_0x2ec687) {
+  const _0x2289c8 = _0x2ec687.target[_0x4b6c('0x3a')] && _0x2ec687.target[_0x4b6c('0x3a')][0];
+  if (!_0x2289c8) return;
+  const _0x3e185e = currentRole === _0x4b6c('0x42') ? _0x4b6c('0x43') : currentUserName;
+  if (_0x2289c8[_0x4b6c('0x45')] > 3 * 1024 * 1024) {
+    alert(_0x4b6c('0x47'));
+    _0x2ec687.target.value = '';
     return;
   }
-
-  const reader = new FileReader();
-  
-  reader.onload = function(event) {
-    const base64Data = event.target.result;
-    
-    if (file.type.startsWith('image/')) {
-      compressImage(base64Data, 300, 0.5, function(compressedUrl) {
-        const msg = {
-          sender: senderName,
-          text: `📎 ${file.name}`,
-          fileName: file.name,
-          fileUrl: compressedUrl,
+  const _0x5ef2f3 = new FileReader();
+  _0x5ef2f3[_0x4b6c('0x3d')] = function(_0x48bb74) {
+    const _0x4c208c = _0x48bb74.target[_0x4b6c('0x48')];
+    if (_0x2289c8[_0x4b6c('0x3b')].startsWith(_0x4b6c('0x3c'))) {
+      compressImage(_0x4c208c, 300, 0.5, function(_0x1b1bdf) {
+        sendChatPayload({
+          sender: _0x3e185e,
+          text: _0x4b6c('0x49') + _0x2289c8[_0x4b6c('0x4a')],
+          fileName: _0x2289c8[_0x4b6c('0x4a')],
+          fileUrl: _0x1b1bdf,
           isImage: true
-        };
-        sendChatPayload(msg);
+        });
       });
     } else {
-      
-      const msg = {
-        sender: senderName,
-        text: `📎 ${file.name} (${Math.round(file.size / 1024)} KB)`,
-        fileName: file.name,
-        fileUrl: base64Data,
+      sendChatPayload({
+        sender: _0x3e185e,
+        text: _0x4b6c('0x49') + _0x2289c8[_0x4b6c('0x4a')] + _0x4b6c('0x4b') + Math.round(_0x2289c8[_0x4b6c('0x45')] / 1024) + _0x4b6c('0x4c'),
+        fileName: _0x2289c8[_0x4b6c('0x4a')],
+        fileUrl: _0x4c208c,
         isFile: true,
         isImage: false
-      };
-      sendChatPayload(msg);
+      });
     }
   };
-
-  reader.onerror = function() {
-    alert("Ошибка при чтении файла");
-  };
-
-  
-  reader.readAsDataURL(file);
-  
-  
-  e.target.value = '';
+  _0x5ef2f3[_0x4b6c('0x4d')](_0x2289c8);
+  _0x2ec687.target.value = '';
 }
 
-function sendChatPayload(msg) {
+function sendChatPayload(_0x217d83) {
   if (db) {
     try {
-      db.ref('chat/messages').push(msg).catch(function(err) {
-        console.warn("Firebase отклонил отправку:", err);
-        alert("Ошибка при отправке в чат: " + err.message);
+      db.ref(_0x4b6c('0x4e'))[_0x4b6c('0x3e')](_0x217d83)['catch'](function(_0x56a684) {
+        alert("Ошибка при отправке в чат: " + _0x56a684.message);
       });
-    } catch (e) {
-      console.warn("Ошибка Firebase:", e);
-    }
+    } catch (_0x5c7e1e) {}
   } else {
-    addChatMessageToDOM(msg);
+    addChatMessageToDOM(_0x217d83);
   }
 }
 
-function addChatMessageToDOM(msg, msgId = null) {
-  const chatMessages = document.getElementById('chatMessages');
-  if (!chatMessages) return;
-  
-  const div = document.createElement('div');
-  div.style.marginBottom = '8px';
-  div.style.fontSize = '14px';
-  div.style.background = '#2a2a3c';
-  div.style.padding = '8px 10px';
-  div.style.borderRadius = '8px';
-  div.style.wordBreak = 'break-word';
-  
-  let html = `<div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div style="flex:1;">
-                  <strong style="color:#89b4fa;">${msg.sender}:</strong> <span>${msg.text}</span>
-                </div>`;
-  
-  if (msgId) {
-    html += `<button onclick="deleteChatMessage('${msgId}')" title="Удалить" style="background:none; border:none; color:#f38ba8; cursor:pointer; font-size:14px; padding:0 0 0 8px; opacity:0.7;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑</button>`;
+function addChatMessageToDOM(_0x1bd040, _0x2a3e6a = null) {
+  const _0x3d66ed = document.getElementById(_0x4b6c('0x4f'));
+  if (!_0x3d66ed) return;
+  const _0x4fae6f = document[_0x4b6c('0x40')](_0x4b6c('0x1c'));
+  _0x4fae6f[_0x4b6c('0x43')][_0x4b6c('0x50')] = _0x4b6c('0x51');
+  _0x4fae6f[_0x4b6c('0x43')][_0x4b6c('0x52')] = _0x4b6c('0x53');
+  _0x4fae6f[_0x4b6c('0x43')][_0x4b6c('0x54')] = _0x4b6c('0x55');
+  _0x4fae6f[_0x4b6c('0x43')][_0x4b6c('0x56')] = _0x4b6c('0x57');
+  _0x4fae6f[_0x4b6c('0x43')][_0x4b6c('0x58')] = _0x4b6c('0x59');
+  _0x4fae6f[_0x4b6c('0x43')][_0x4b6c('0x5a')] = _0x4b6c('0x5b');
+  let _0x26ffbf = "<div style='display:flex; justify-content:space-between; align-items:flex-start;'><div style='flex:1;'><strong style='color:#89b4fa;'>" + _0x1bd040.sender + ":</strong> <span>" + _0x1bd040.text + "</span></div>";
+  if (_0x2a3e6a) {
+    _0x26ffbf += "<button onclick=\"deleteChatMessage('" + _0x2a3e6a + "')\" title='Удалить' style='background:none; border:none; color:#f38ba8; cursor:pointer; font-size:14px; padding:0 0 0 8px; opacity:0.7;' onmouseover='this.style.opacity=1' onmouseout='this.style.opacity=0.7'>🗑</button>";
   }
-  
-  html += `</div>`;
-  
-  
-  if (msg.isImage && msg.fileUrl) {
-    html += `
-      <div style="margin-top:6px;">
-        <img src="${msg.fileUrl}" style="max-width:100%; border-radius:6px; display:block; margin-bottom:4px;">
-        <a href="${msg.fileUrl}" download="${msg.fileName || 'image.jpg'}" style="display:inline-block; font-size:12px; color:#a6e3a1; text-decoration:underline;">📥 Скачать картинку</a>
-      </div>`;
-  } 
-   
-  else if (msg.isFile && msg.fileUrl) {
-    const isPdf = msg.fileName && msg.fileName.toLowerCase().endsWith('.pdf');
-    
-    html += `
-      <div style="margin-top: 8px; padding: 8px; background: #181825; border-radius: 6px; border: 1px solid #313244;">
-        <div style="font-size: 13px; color: #cdd6f4; margin-bottom: 6px; word-break: break-all;">
-          📄 <b>${msg.fileName || 'Файл'}</b>
-        </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          ${isPdf ? `
-            <button type="button" onclick="openPdfModal('${msg.fileUrl}', '${msg.fileName || 'Документ PDF'}')" style="background: #b4befe; color: #11111b; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-              🔍 Просмотр
-            </button>
-          ` : ''}
-          <a href="${msg.fileUrl}" download="${msg.fileName || 'file'}" style="background: #a6e3a1; color: #11111b; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;">
-            💾 Скачать
-          </a>
-        </div>
-      </div>
-    `;
+  _0x26ffbf += "</div>";
+  if (_0x1bd040[_0x4b6c('0x62')] && _0x1bd040[_0x4b6c('0x63')]) {
+    _0x26ffbf += "<div style='margin-top:6px;'><img src='" + _0x1bd040[_0x4b6c('0x63')] + "' style='max-width:100%; border-radius:6px; display:block; margin-bottom:4px;'><a href='" + _0x1bd040[_0x4b6c('0x63')] + "' download='" + (_0x1bd040.fileName || 'image.jpg') + "' style='display:inline-block; font-size:12px; color:#a6e3a1; text-decoration:underline;'>📥 Скачать картинку</a></div>";
+  } else if (_0x1bd040[_0x4b6c('0x65')] && _0x1bd040[_0x4b6c('0x63')]) {
+    const _0x50d750 = _0x1bd040.fileName && _0x1bd040.fileName[_0x4b6c('0x67')]()['endsWith']('.pdf');
+    _0x26ffbf += "<div style='margin-top: 8px; padding: 8px; background: #181825; border-radius: 6px; border: 1px solid #313244;'><div style='font-size: 13px; color: #cdd6f4; margin-bottom: 6px; word-break: break-all;'>📄 <b>" + (_0x1bd040.fileName || 'Файл') + "</b></div><div style='display: flex; gap: 8px; flex-wrap: wrap;'>" + (_0x50d750 ? "<button type='button' onclick=\"openPdfModal('" + _0x1bd040[_0x4b6c('0x63')] + "', '" + (_0x1bd040.fileName || 'Документ PDF') + "')\" style='background: #b4befe; color: #11111b; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;'>🔍 Просмотр</button>" : "") + "<a href='" + _0x1bd040[_0x4b6c('0x63')] + "' download='" + (_0x1bd040.fileName || 'file') + "' style='background: #a6e3a1; color: #11111b; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;'>💾 Скачать</a></div></div>";
   }
-  
-  div.innerHTML = html;
-  chatMessages.appendChild(div);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  _0x4fae6f[_0x4b6c('0x37')] = _0x26ffbf;
+  _0x3d66ed[_0x4b6c('0x6d')](_0x4fae6f);
+  _0x3d66ed[_0x4b6c('0x6e')] = _0x3d66ed[_0x4b6c('0x6f')];
 }
 
-function deleteChatMessage(msgId) {
-  if (confirm("Удалить это сообщение/файл из чата?")) {
-    if (db) {
-      db.ref(`chat/messages/${msgId}`).remove().catch((err) => {
-        alert("Ошибка при удалении: " + err.message);
-      });
-    }
+function deleteChatMessage(_0x2b814e) {
+  if (confirm(_0x4b6c('0x70'))) {
+    if (db) db.ref('chat/messages/' + _0x2b814e)[_0x4b6c('0x38')]();
   }
 }
-
 
 function showBigTextModal() {
-  const modal = document.getElementById('text-modal');
-  if (modal) {
-    modal.style.display = 'flex';
-    document.getElementById('bigTextInput').value = '';
+  const _0x1d58d9 = document.getElementById(_0x4b6c('0x71'));
+  if (_0x1d58d9) {
+    _0x1d58d9[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x5c');
+    document.getElementById(_0x4b6c('0x73')).value = '';
   }
 }
 
 function closeBigTextModal() {
-  const modal = document.getElementById('text-modal');
-  if (modal) modal.style.display = 'none';
+  const _0x181a44 = document.getElementById(_0x4b6c('0x71'));
+  if (_0x181a44) _0x181a44[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x62');
 }
 
 function confirmBigText() {
-  const input = document.getElementById('bigTextInput');
-  if (!input) return;
-  const text = input.value.trim();
-  if (text !== '') {
-    const item = { type: 'text', content: text, x: 100, y: 100 };
+  const _0x56a4eb = document.getElementById(_0x4b6c('0x73'));
+  if (!_0x56a4eb) return;
+  const _0x5dc3b1 = _0x56a4eb.value[_0x4b6c('0x41')]();
+  if (_0x5dc3b1 !== '') {
+    const _0x39a3f2 = { type: _0x4b6c('0x74'), content: _0x5dc3b1, x: 100, y: 100 };
     if (db) {
-      try { db.ref('board/items').push(item); } catch(e) { addItemToBoardDOM(item); }
+      try { db.ref(_0x4b6c('0x39'))[_0x4b6c('0x3e')](_0x39a3f2); } catch (_0x550d5e) { addItemToBoardDOM(_0x39a3f2); }
     } else {
-      addItemToBoardDOM(item);
+      addItemToBoardDOM(_0x39a3f2);
     }
   }
   closeBigTextModal();
 }
 
-function addItemToBoardDOM(item) {
-  let listContainer = document.getElementById('board-word-list');
-  if (!listContainer) return;
-  
-  const elem = document.createElement('div');
-  elem.className = 'board-item';
-  elem.style.position = 'absolute';
-  elem.style.left = (item.x || 50) + 'px';
-  elem.style.top = (item.y || 50) + 'px';
-  elem.style.zIndex = '50';
+function addItemToBoardDOM(_0x1b4020) {
+  let _0x16b0d9 = document.getElementById(_0x4b6c('0x36'));
+  if (!_0x16b0d9) return;
+  const _0x559e3d = document[_0x4b6c('0x40')](_0x4b6c('0x76'));
+  _0x559e3d[_0x4b6c('0x77')] = _0x4b6c('0x75');
+  _0x559e3d[_0x4b6c('0x43')][_0x4b6c('0x79')] = _0x4b6c('0x7a');
+  _0x559e3d[_0x4b6c('0x43')][_0x4b6c('0x2c')] = (_0x1b4020.x || 50) + _0x4b6c('0x7b');
+  _0x559e3d[_0x4b6c('0x43')][_0x4b6c('0x2d')] = (_0x1b4020.y || 50) + _0x4b6c('0x7b');
+  _0x559e3d[_0x4b6c('0x43')][_0x4b6c('0x7c')] = _0x4b6c('0x7d');
 
-  if (item.type === 'image') {
-    const img = document.createElement('img');
-    img.src = item.content;
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'contain';
-    img.style.borderRadius = '8px';
-    img.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-    img.style.pointerEvents = 'none'; 
-    
-    elem.appendChild(img);
-    
-    
-    elem.style.width = item.width ? item.width + 'px' : '220px';
-    if (item.height) elem.style.height = item.height + 'px';
+  if (_0x1b4020.type === 'image') {
+    const _0x3e18a2 = document[_0x4b6c('0x40')](_0x4b6c('0x7e'));
+    _0x3e18a2[_0x4b6c('0x7f')] = _0x1b4020[_0x4b6c('0x80')];
+    _0x3e18a2[_0x4b6c('0x43')][_0x4b6c('0x1b')] = _0x4b6c('0x81');
+    _0x3e18a2[_0x4b6c('0x43')][_0x4b6c('0x1c')] = _0x4b6c('0x81');
+    _0x3e18a2[_0x4b6c('0x43')][_0x4b6c('0x82')] = _0x4b6c('0x83');
+    _0x3e18a2[_0x4b6c('0x43')][_0x4b6c('0x56')] = _0x4b6c('0x57');
+    _0x3e18a2[_0x4b6c('0x43')][_0x4b6c('0x84')] = _0x4b6c('0x85');
+    _0x3e18a2[_0x4b6c('0x43')][_0x4b6c('0x86')] = _0x4b6c('0x87');
+    _0x559e3d[_0x4b6c('0x6d')](_0x3e18a2);
+    _0x559e3d[_0x4b6c('0x43')][_0x4b6c('0x1b')] = _0x1b4020[_0x4b6c('0x1b')] ? _0x1b4020[_0x4b6c('0x1b')] + _0x4b6c('0x7b') : _0x4b6c('0x88');
+    if (_0x1b4020[_0x4b6c('0x1c')]) _0x559e3d[_0x4b6c('0x43')][_0x4b6c('0x1c')] = _0x1b4020[_0x4b6c('0x1c')] + _0x4b6c('0x7b');
   } else {
-    elem.innerText = item.content;
-    elem.style.background = '#89b4fa';
-    elem.style.color = '#11111b';
-    elem.style.padding = '10px 16px';
-    elem.style.borderRadius = '8px';
-    elem.style.fontWeight = 'bold';
-    elem.style.fontSize = '18px';
-    elem.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-    elem.style.whiteSpace = 'pre-wrap';
+    _0x559e3d[_0x4b6c('0x8f')] = _0x1b4020[_0x4b6c('0x80')];
+    _0x559e3d[_0x4b6c('0x43')][_0x4b6c('0x54')] = _0x4b6c('0x89');
+    _0x559e3d[_0x4b6c('0x43')][_0x4b6c('0x22')] = _0x4b6c('0x8a');
+    _0x559e3d[_0x4b6c('0x43')][_0x4b6c('0x56')] = _0x4b6c('0x8b');
+    _0x559e3d[_0x4b6c('0x43')][_0x4b6c('0x56')] = _0x4b6c('0x57');
+    _0x559e3d[_0x4b6c('0x43')]['fontWeight'] = _0x4b6c('0x8c');
+    _0x559e3d[_0x4b6c('0x43')][_0x4b6c('0x52')] = _0x4b6c('0x8d');
+    _0x559e3d[_0x4b6c('0x43')][_0x4b6c('0x84')] = _0x4b6c('0x8e');
+    _0x559e3d[_0x4b6c('0x43')]['whiteSpace'] = _0x4b6c('0x8f');
   }
 
-  
-  const handle = document.createElement('div');
-  handle.className = 'resize-handle';
-  elem.appendChild(handle);
-
-  listContainer.appendChild(elem);
-
-
-  makeElementInteractive(elem, handle, item);
+  const _0x27cb5e = document[_0x4b6c('0x40')](_0x4b6c('0x76'));
+  _0x27cb5e[_0x4b6c('0x77')] = _0x4b6c('0x90');
+  _0x559e3d[_0x4b6c('0x6d')](_0x27cb5e);
+  _0x16b0d9[_0x4b6c('0x6d')](_0x559e3d);
+  makeElementInteractive(_0x559e3d, _0x27cb5e, _0x1b4020);
 }
 
+function makeElementInteractive(_0x4b6845, _0x1a8f92, _0x50c33a) {
+  let _0x4299b0 = false, _0x12c8b0 = false;
+  let _0x5821c4, _0x1536b1, _0x498528, _0x53e414;
 
-function makeElementInteractive(elem, handle, item) {
-  let isDragging = false;
-  let isResizing = false;
-  let startX, startY, startWidth, startHeight, startLeft, startTop;
-
-  // -
-  const onDragStart = (e) => {
-    if (e.target === handle) return; 
-    
-    
-    isDragging = true;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-    startX = clientX - elem.offsetLeft;
-    startY = clientY - elem.offsetTop;
+  const _0x1525a1 = (_0x55d78c) => {
+    if (_0x55d78c[_0x4b6c('0x92')] === _0x1a8f92) return;
+    _0x4299b0 = true;
+    const _0x3b8d1b = _0x55d78c[_0x4b6c('0x2e')] ? _0x55d78c[_0x4b6c('0x2e')][0][_0x4b6c('0x2f')] : _0x55d78c[_0x4b6c('0x2f')];
+    const _0x1b93f6 = _0x55d78c[_0x4b6c('0x2e')] ? _0x55d78c[_0x4b6c('0x2e')][0][_0x4b6c('0x30')] : _0x55d78c[_0x4b6c('0x30')];
+    _0x5821c4 = _0x3b8d1b - _0x4b6845[_0x4b6c('0x93')];
+    _0x1536b1 = _0x1b93f6 - _0x4b6845[_0x4b6c('0x94')];
   };
 
-  const onDragMove = (e) => {
-    if (!isDragging) return;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-    elem.style.left = (clientX - startX) + 'px';
-    elem.style.top = (clientY - startY) + 'px';
+  const _0x44d326 = (_0x21bdcf) => {
+    if (!_0x4299b0) return;
+    const _0x3e17bf = _0x21bdcf[_0x4b6c('0x2e')] ? _0x21bdcf[_0x4b6c('0x2e')][0][_0x4b6c('0x2f')] : _0x21bdcf[_0x4b6c('0x2f')];
+    const _0x53b1cf = _0x21bdcf[_0x4b6c('0x2e')] ? _0x21bdcf[_0x4b6c('0x2e')][0][_0x4b6c('0x30')] : _0x21bdcf[_0x4b6c('0x30')];
+    _0x4b6845[_0x4b6c('0x43')][_0x4b6c('0x2c')] = (_0x3e17bf - _0x5821c4) + _0x4b6c('0x7b');
+    _0x4b6845[_0x4b6c('0x43')][_0x4b6c('0x2d')] = (_0x53b1cf - _0x1536b1) + _0x4b6c('0x7b');
   };
 
-  const onDragEnd = () => {
-    if (isDragging) {
-      isDragging = false;
-      
-      if (db && item.id) {
-        db.ref(`board/items/${item.id}`).update({
-          x: parseInt(elem.style.left),
-          y: parseInt(elem.style.top)
+  const _0x256e39 = () => {
+    if (_0x4299b0) {
+      _0x4299b0 = false;
+      if (db && _0x50c33a.id) {
+        db.ref('board/items/' + _0x50c33a.id)[_0x4b6c('0x95')]({
+          x: parseInt(_0x4b6845[_0x4b6c('0x43')][_0x4b6c('0x2c')]),
+          y: parseInt(_0x4b6845[_0x4b6c('0x43')][_0x4b6c('0x2d')])
         });
       }
     }
   };
 
-  // --
-  const onResizeStart = (e) => {
-    e.stopPropagation(); // Отменяем всплытие, чтобы не срабатывал drag
-    isResizing = true;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-    startX = clientX;
-    startY = clientY;
-    startWidth = elem.offsetWidth;
-    startHeight = elem.offsetHeight;
+  const _0x1e3674 = (_0x4f6b21) => {
+    _0x4f6b21[_0x4b6c('0x9b')]();
+    _0x12c8b0 = true;
+    const _0x23a31d = _0x4f6b21[_0x4b6c('0x2e')] ? _0x4f6b21[_0x4b6c('0x2e')][0][_0x4b6c('0x2f')] : _0x4f6b21[_0x4b6c('0x2f')];
+    const _0x4fa6e4 = _0x4f6b21[_0x4b6c('0x2e')] ? _0x4f6b21[_0x4b6c('0x2e')][0][_0x4b6c('0x30')] : _0x4f6b21[_0x4b6c('0x30')];
+    _0x5821c4 = _0x23a31d;
+    _0x1536b1 = _0x4fa6e4;
+    _0x498528 = _0x4b6845[_0x4b6c('0x96')];
+    _0x53e414 = _0x4b6845[_0x4b6c('0x97')];
   };
 
-  const onResizeMove = (e) => {
-    if (!isResizing) return;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-    const newWidth = Math.max(50, startWidth + (clientX - startX));
-    const newHeight = Math.max(50, startHeight + (clientY - startY));
-
-    elem.style.width = newWidth + 'px';
-    elem.style.height = newHeight + 'px';
+  const _0x59905c = (_0x4ad70c) => {
+    if (!_0x12c8b0) return;
+    const _0x4d32a1 = _0x4ad70c[_0x4b6c('0x2e')] ? _0x4ad70c[_0x4b6c('0x2e')][0][_0x4b6c('0x2f')] : _0x4ad70c[_0x4b6c('0x2f')];
+    const _0x43ef8d = _0x4ad70c[_0x4b6c('0x2e')] ? _0x4ad70c[_0x4b6c('0x2e')][0][_0x4b6c('0x30')] : _0x4ad70c[_0x4b6c('0x30')];
+    const _0x3b8908 = Math[_0x4b6c('0x98')](50, _0x498528 + (_0x4d32a1 - _0x5821c4));
+    const _0x375e81 = Math[_0x4b6c('0x98')](50, _0x53e414 + (_0x43ef8d - _0x1536b1));
+    _0x4b6845[_0x4b6c('0x43')][_0x4b6c('0x1b')] = _0x3b8908 + _0x4b6c('0x7b');
+    _0x4b6845[_0x4b6c('0x43')][_0x4b6c('0x1c')] = _0x375e81 + _0x4b6c('0x7b');
   };
 
-  const onResizeEnd = () => {
-    if (isResizing) {
-      isResizing = false;
-      // Сохраняем размеры в Firebase
-      if (db && item.id) {
-        db.ref(`board/items/${item.id}`).update({
-          width: parseInt(elem.style.width),
-          height: parseInt(elem.style.height)
+  const _0x4be1ee = () => {
+    if (_0x12c8b0) {
+      _0x12c8b0 = false;
+      if (db && _0x50c33a.id) {
+        db.ref('board/items/' + _0x50c33a.id)[_0x4b6c('0x95')]({
+          width: parseInt(_0x4b6845[_0x4b6c('0x43')][_0x4b6c('0x1b')]),
+          height: parseInt(_0x4b6845[_0x4b6c('0x43')][_0x4b6c('0x1c')])
         });
       }
     }
   };
 
-  
-  elem.addEventListener('mousedown', onDragStart);
-  window.addEventListener('mousemove', onDragMove);
-  window.addEventListener('mouseup', onDragEnd);
+  _0x4b6845[_0x4b6c('0xd')](_0x4b6c('0xe'), _0x1525a1);
+  window[_0x4b6c('0xd')](_0x4b6c('0xf'), _0x44d326);
+  window[_0x4b6c('0xd')](_0x4b6c('0x10'), _0x256e39);
+  _0x4b6845[_0x4b6c('0xd')](_0x4b6c('0x12'), _0x1525a1, { passive: false });
+  window[_0x4b6c('0xd')](_0x4b6c('0x13'), _0x44d326, { passive: false });
+  window[_0x4b6c('0xd')](_0x4b6c('0x14'), _0x256e39);
 
-  elem.addEventListener('touchstart', onDragStart, { passive: false });
-  window.addEventListener('touchmove', onDragMove, { passive: false });
-  window.addEventListener('touchend', onDragEnd);
-
-  // События для изменения размера (Маркер)
-  handle.addEventListener('mousedown', onResizeStart);
-  window.addEventListener('mousemove', onResizeMove);
-  window.addEventListener('mouseup', onResizeEnd);
-
-  handle.addEventListener('touchstart', onResizeStart, { passive: false });
-  window.addEventListener('touchmove', onResizeMove, { passive: false });
-  window.addEventListener('touchend', onResizeEnd);
+  _0x1a8f92[_0x4b6c('0xd')](_0x4b6c('0xe'), _0x1e3674);
+  window[_0x4b6c('0xd')](_0x4b6c('0xf'), _0x59905c);
+  window[_0x4b6c('0xd')](_0x4b6c('0x10'), _0x4be1ee);
+  _0x1a8f92[_0x4b6c('0xd')](_0x4b6c('0x12'), _0x1e3674, { passive: false });
+  window[_0x4b6c('0xd')](_0x4b6c('0x13'), _0x59905c, { passive: false });
+  window[_0x4b6c('0xd')](_0x4b6c('0x14'), _0x4be1ee);
 }
 
-//
-function compressImage(src, maxWidth, quality, callback) {
-  const img = new Image();
-  img.onload = () => {
-    const scale = maxWidth / img.width;
-    const width = scale < 1 ? maxWidth : img.width;
-    const height = scale < 1 ? img.height * scale : img.height;
-
-    const elem = document.createElement('canvas');
-    elem.width = width;
-    elem.height = height;
-    const ctxElem = elem.getContext('2d');
-    ctxElem.drawImage(img, 0, 0, width, height);
-    callback(elem.toDataURL('image/jpeg', quality));
+function compressImage(_0x1b1bdf, _0x3b8908, _0x375e81, _0x2764ba) {
+  const _0x31ec69 = new Image();
+  _0x31ec69[_0x4b6c('0x3d')] = () => {
+    const _0x2ec687 = _0x3b8908 / _0x31ec69[_0x4b6c('0x1b')];
+    const _0x2289c8 = _0x2ec687 < 1 ? _0x3b8908 : _0x31ec69[_0x4b6c('0x1b')];
+    const _0x3e185e = _0x2ec687 < 1 ? _0x31ec69[_0x4b6c('0x1c')] * _0x2ec687 : _0x31ec69[_0x4b6c('0x1c')];
+    const _0x48bb74 = document[_0x4b6c('0x40')](_0x4b6c('0x1c'));
+    _0x48bb74[_0x4b6c('0x1b')] = _0x2289c8;
+    _0x48bb74[_0x4b6c('0x1c')] = _0x3e185e;
+    const _0x4c208c = _0x48bb74[_0x4b6c('0xa')](_0x4b6c('0x9'));
+    _0x4c208c[_0x4b6c('0x1f')](_0x31ec69, 0, 0, _0x2289c8, _0x3e185e);
+    _0x2764ba(_0x48bb74[_0x4b6c('0x32')](_0x4b6c('0x9a'), _0x375e81));
   };
-  img.src = src;
+  _0x31ec69.src = _0x1b1bdf;
 }
-
-// ==========================================
-// 
-// ==========================================
 
 function loginWithPin() {
-  const pinInput = document.getElementById('authPinInput');
-  const pin = pinInput ? String(pinInput.value).trim() : '';
-  const errorElement = document.getElementById('authError');
-
-  if (errorElement) {
-    errorElement.style.display = 'none';
-    errorElement.innerText = '';
+  const _0x217d83 = document.getElementById(_0x4b6c('0x9b'));
+  const _0x56a684 = _0x217d83 ? String(_0x217d83.value)[_0x4b6c('0x41')]() : '';
+  const _0x5c7e1e = document.getElementById(_0x4b6c('0x9c'));
+  if (_0x5c7e1e) {
+    _0x5c7e1e[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x62');
+    _0x5c7e1e[_0x4b6c('0x8f')] = '';
   }
-
-  if (!pin) {
-    if (errorElement) {
-      errorElement.style.display = 'block';
-      errorElement.innerText = 'Введите PIN-код';
+  if (!_0x56a684) {
+    if (_0x5c7e1e) {
+      _0x5c7e1e[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x9d');
+      _0x5c7e1e[_0x4b6c('0x8f')] = _0x4b6c('0x9e');
     }
     return;
   }
-
-  
-  if (!db || firebaseConfig.databaseURL.includes('YOUR_DATABASE_NAME')) {
-    if (errorElement) {
-      errorElement.style.display = 'block';
-      errorElement.innerText = 'Ошибка: Проверь databaseURL в начале script.js!';
+  if (!db || firebaseConfig[_0x4b6c('0x0')].includes(_0x4b6c('0x9f'))) {
+    if (_0x5c7e1e) {
+      _0x5c7e1e[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x9d');
+      _0x5c7e1e[_0x4b6c('0x8f')] = _0x4b6c('0xa0');
     }
     return;
   }
-
-  
-  db.ref('teachers').once('value').then((teacherSnapshot) => {
-    const teachers = teacherSnapshot.val();
-    let isTeacher = false;
-
-    if (teachers) {
-      Object.keys(teachers).forEach((key) => {
-        const tPin = String(teachers[key].pin || '').trim();
-        if (tPin === pin) {
-          isTeacher = true;
-        }
+  db.ref(_0x4b6c('0xa1'))[_0x4b6c('0xa2')](_0x4b6c('0x17')).then((_0x1bd040) => {
+    const _0x2a3e6a = _0x1bd040[_0x4b6c('0xa3')]();
+    let _0x4fae6f = false;
+    if (_0x2a3e6a) {
+      Object.keys(_0x2a3e6a).forEach((_0x26ffbf) => {
+        const _0x50d750 = String(_0x2a3e6a[_0x26ffbf][_0x4b6c('0xa4')] || '')[_0x4b6c('0x41')]();
+        if (_0x50d750 === _0x56a684) _0x4fae6f = true;
       });
     }
-
-    if (isTeacher) {
-      currentRole = 'teacher';
-      currentUserName = 'Учитель';
-      const teacherSec = document.getElementById('teacherSection');
-      if (teacherSec) teacherSec.style.display = 'block';
-      document.getElementById('auth-overlay').style.display = 'none';
+    if (_0x4fae6f) {
+      currentRole = _0x4b6c('0x42');
+      currentUserName = _0x4b6c('0x43');
+      const _0x1d58d9 = document.getElementById(_0x4b6c('0xa7'));
+      if (_0x1d58d9) _0x1d58d9[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x9d');
+      document.getElementById(_0x4b6c('0xa9'))[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x62');
       initPeerJS();
       return;
     }
-
-    
-    return db.ref('students').once('value').then((studentSnapshot) => {
-      const students = studentSnapshot.val();
-      let foundStudent = null;
-
-      if (students) {
-        Object.keys(students).forEach((key) => {
-          const studentPin = String(students[key].pin || '').trim();
-          if (studentPin === pin) {
-            foundStudent = students[key];
-          }
+    return db.ref(_0x4b6c('0xab'))[_0x4b6c('0xa2')](_0x4b6c('0x17')).then((_0x181a44) => {
+      const _0x56a4eb = _0x181a44[_0x4b6c('0xa3')]();
+      let _0x5dc3b1 = null;
+      if (_0x56a4eb) {
+        Object.keys(_0x56a4eb).forEach((_0x39a3f2) => {
+          const _0x1b4020 = String(_0x56a4eb[_0x39a3f2][_0x4b6c('0xa4')] || '')[_0x4b6c('0x41')]();
+          if (_0x1b4020 === _0x56a684) _0x5dc3b1 = _0x56a4eb[_0x39a3f2];
         });
       }
-
-      if (foundStudent) {
-        currentRole = 'student';
-        currentUserName = foundStudent.name || 'Ученик';
-        const teacherSec = document.getElementById('teacherSection');
-        if (teacherSec) teacherSec.style.display = 'none';
-        document.getElementById('auth-overlay').style.display = 'none';
+      if (_0x5dc3b1) {
+        currentRole = _0x4b6c('0xa5');
+        currentUserName = _0x5dc3b1[_0x4b6c('0xac')] || _0x4b6c('0xa6');
+        const _0x16b0d9 = document.getElementById(_0x4b6c('0xa7'));
+        if (_0x16b0d9) _0x16b0d9[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x62');
+        document.getElementById(_0x4b6c('0xa9'))[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x62');
         initPeerJS();
       } else {
-        if (errorElement) {
-          errorElement.style.display = 'block';
-          errorElement.innerText = 'Неверный PIN-код!';
+        if (_0x5c7e1e) {
+          _0x5c7e1e[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x9d');
+          _0x5c7e1e[_0x4b6c('0x8f')] = _0x4b6c('0xad');
         }
       }
     });
-  }).catch((err) => {
-    console.error("Ошибка авторизации:", err);
-    if (errorElement) {
-      errorElement.style.display = 'block';
-      errorElement.innerText = 'Ошибка базы данных: ' + err.message;
+  })['catch']((_0x559e3d) => {
+    if (_0x5c7e1e) {
+      _0x5c7e1e[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x9d');
+      _0x5c7e1e[_0x4b6c('0x8f')] = "Ошибка базы данных: " + _0x559e3d.message;
     }
   });
 }
 
 function logout() {
-  document.getElementById('auth-overlay').style.display = 'flex';
-  const pinInput = document.getElementById('authPinInput');
-  if (pinInput) pinInput.value = '';
+  document.getElementById(_0x4b6c('0xa9'))[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x5c');
+  const _0x3e18a2 = document.getElementById(_0x4b6c('0x9b'));
+  if (_0x3e18a2) _0x3e18a2.value = '';
 }
 
-// ==========================================
-// --- ---
-// ==========================================
-
 function showAdminModal() {
-  const modal = document.getElementById('admin-modal');
-  if (modal) {
-    modal.style.display = 'flex';
+  const _0x27cb5e = document.getElementById(_0x4b6c('0xae'));
+  if (_0x27cb5e) {
+    _0x27cb5e[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x5c');
     loadAdminStudentsList();
   }
 }
 
 function closeAdminModal() {
-  const modal = document.getElementById('admin-modal');
-  if (modal) modal.style.display = 'none';
+  const _0x4b6845 = document.getElementById(_0x4b6c('0xae'));
+  if (_0x4b6845) _0x4b6845[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x62');
 }
 
 function saveBatchStudents() {
-  if (!db) {
-    alert("База данных недоступна");
-    return;
-  }
-
-  const nameInputs = document.querySelectorAll('.new-st-name');
-  const pinInputs = document.querySelectorAll('.new-st-pin');
-  
-  let addedCount = 0;
-  const updates = {};
-
-  nameInputs.forEach((input, index) => {
-    const name = input.value.trim();
-    const pin = pinInputs[index] ? String(pinInputs[index].value).trim() : '';
-
-    if (name && pin) {
-      const newKey = db.ref('students').push().key;
-      updates['students/' + newKey] = {
-        name: name,
-        pin: pin,
-        createdAt: Date.now()
-      };
-      addedCount++;
+  if (!db) return alert("База данных недоступна");
+  const _0x1a8f92 = document[_0x4b6c('0xb1')](_0x4b6c('0xb0'));
+  const _0x50c33a = document[_0x4b6c('0xb1')](_0x4b6c('0xb2'));
+  let _0x4299b0 = 0;
+  const _0x12c8b0 = {};
+  _0x1a8f92.forEach((_0x5821c4, _0x1536b1) => {
+    const _0x498528 = _0x5821c4.value[_0x4b6c('0x41')]();
+    const _0x53e414 = _0x50c33a[_0x1536b1] ? String(_0x50c33a[_0x1536b1].value)[_0x4b6c('0x41')]() : '';
+    if (_0x498528 && _0x53e414) {
+      const _0x1525a1 = db.ref(_0x4b6c('0xab'))[_0x4b6c('0xb3')]()['key'];
+      _0x12c8b0[_0x4b6c('0xb7') + _0x1525a1] = { name: _0x498528, pin: _0x53e414, createdAt: Date[_0x4b6c('0xb6')]() };
+      _0x4299b0++;
     }
   });
-
-  if (addedCount === 0) {
-    alert("Заполните имя и PIN хотя бы для одного ученика!");
-    return;
-  }
-
-  db.ref().update(updates).then(() => {
-    nameInputs.forEach(i => i.value = '');
-    pinInputs.forEach(i => i.value = '');
-    alert(`Успешно добавлено учеников: ${addedCount}`);
-  }).catch((err) => {
-    alert("Ошибка при сохранении: " + err.message);
+  if (_0x4299b0 === 0) return alert(_0x4b6c('0xb8'));
+  db.ref().update(_0x12c8b0).then(() => {
+    _0x1a8f92.forEach(_0x44d326 => _0x44d326.value = '');
+    _0x50c33a.forEach(_0x256e39 => _0x256e39.value = '');
+    alert(_0x4b6c('0xb9') + _0x4299b0);
+  })['catch']((_0x1e3674) => {
+    alert("Ошибка при сохранении: " + _0x1e3674.message);
   });
 }
 
 function loadAdminStudentsList() {
-  const listContainer = document.getElementById('adminStudentsList');
-  if (!listContainer) return;
-
-  if (!db) {
-    listContainer.innerHTML = '<p style="color:#f38ba8;">База данных не подключена</p>';
-    return;
-  }
-
-  db.ref('students').on('value', (snapshot) => {
-    const students = snapshot.val();
-    listContainer.innerHTML = '';
-
-    if (!students) {
-      listContainer.innerHTML = '<p style="color:#a6adc8;">Список учеников пуст</p>';
-      return;
-    }
-
-    Object.keys(students).forEach((id) => {
-      const st = students[id];
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:#181825; padding:8px 12px; margin-bottom:6px; border-radius:6px;';
-      
-      row.innerHTML = `
-        <div style="flex:1;">
-          <strong style="color:#cdd6f4;">${st.name}</strong>
-          <span style="color:#a6adc8; font-size:13px; margin-left:10px;">PIN: <b style="color:#a6e3a1;">${st.pin}</b></span>
-        </div>
-        <div style="display:flex; gap:6px;">
-          <button type="button" onclick="changeStudentPin('${id}', '${st.name}', '${st.pin}')" style="background:#89b4fa; color:#11111b; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">🔑 Сменить PIN</button>
-          <button type="button" onclick="deleteStudent('${id}', '${st.name}')" style="background:#f38ba8; color:#11111b; border:none; padding:4px 8px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">🗑</button>
-        </div>
-      `;
-      listContainer.appendChild(row);
+  const _0x59905c = document.getElementById(_0x4b6c('0xba'));
+  if (!_0x59905c) return;
+  if (!db) return _0x59905c[_0x4b6c('0x37')] = '<p style="color:#f38ba8;">' + _0x4b6c('0xbb') + '</p>';
+  db.ref(_0x4b6c('0xab'))[_0x4b6c('0xbc')](_0x4b6c('0x17'), (_0x4be1ee) => {
+    const _0x1b1bdf = _0x4be1ee[_0x4b6c('0xa3')]();
+    _0x59905c[_0x4b6c('0x37')] = '';
+    if (!_0x1b1bdf) return _0x59905c[_0x4b6c('0x37')] = '<p style="color:#a6adc8;">' + _0x4b6c('0xbd') + '</p>';
+    Object.keys(_0x1b1bdf).forEach((_0x3b8908) => {
+      const _0x375e81 = _0x1b1bdf[_0x3b8908];
+      const _0x2764ba = document[_0x4b6c('0x40')](_0x4b6c('0x76'));
+      _0x2764ba[_0x4b6c('0x43')][_0x4b6c('0xbe')] = _0x4b6c('0xbf');
+      _0x2764ba[_0x4b6c('0x37')] = _0x4b6c('0xc0') + _0x375e81.name + _0x4b6c('0xc1') + _0x375e81.pin + _0x4b6c('0xc2') + _0x3b8908 + "', '" + _0x375e81.name + "', '" + _0x375e81.pin + _0x4b6c('0xc3') + _0x3b8908 + "', '" + _0x375e81.name + _0x4b6c('0xc4');
+      _0x59905c[_0x4b6c('0x6d')](_0x2764ba);
     });
   });
 }
 
-function changeStudentPin(studentId, name, currentPin) {
-  const newPin = prompt(`Введите новый PIN/пароль для ученика "${name}":`, currentPin);
-  
-  if (newPin !== null) {
-    const trimmedPin = newPin.trim();
-    if (!trimmedPin) {
-      alert("PIN-код не может быть пустым!");
-      return;
-    }
-
+function changeStudentPin(_0x31ec69, _0x2ec687, _0x2289c8) {
+  const _0x3e185e = prompt(_0x4b6c('0xc5') + _0x2ec687 + '":', _0x2289c8);
+  if (_0x3e185e !== null) {
+    const _0x48bb74 = _0x3e185e[_0x4b6c('0x41')]();
+    if (!_0x48bb74) return alert(_0x4b6c('0xc7'));
     if (db) {
-      db.ref(`students/${studentId}`).update({
-        pin: trimmedPin
-      }).then(() => {
-        alert("Пароль успешно изменен!");
-      }).catch((err) => {
-        alert("Ошибка при обновлении: " + err.message);
+      db.ref('students/' + _0x31ec69)[_0x4b6c('0x95')]({ pin: _0x48bb74 }).then(() => {
+        alert(_0x4b6c('0xc8'));
+      })['catch']((_0x4c208c) => {
+        alert("Ошибка при обновлении: " + _0x4c208c.message);
       });
     }
   }
 }
 
-function deleteStudent(studentId, name) {
-  if (confirm(`Удалить ученика "${name}"?`)) {
-    if (db) {
-      db.ref(`students/${studentId}`).remove();
-    }
+function deleteStudent(_0x1b1bdf, _0x3b8908) {
+  if (confirm(_0x4b6c('0xc9') + _0x3b8908 + '"?')) {
+    if (db) db.ref('students/' + _0x1b1bdf)[_0x4b6c('0x38')]();
   }
 }
-
-// ==========================================
-// 
-// ==========================================
 
 function listenToCanvas() {
   try {
-    db.ref('board/canvas').on('value', (snapshot) => {
-      const dataURL = snapshot.val();
-      if (dataURL) {
-        const img = new Image();
-        img.onload = () => {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0);
+    db.ref(_0x4b6c('0x33'))[_0x4b6c('0xbc')](_0x4b6c('0x17'), (_0x375e81) => {
+      const _0x2764ba = _0x375e81[_0x4b6c('0xa3')]();
+      if (_0x2764ba) {
+        const _0x31ec69 = new Image();
+        _0x31ec69[_0x4b6c('0x3d')] = () => {
+          ctx[_0x4b6c('0x35')](0, 0, canvas[_0x4b6c('0x1b')], canvas[_0x4b6c('0x1c')]);
+          ctx[_0x4b6c('0x1f')](_0x31ec69, 0, 0);
         };
-        img.src = dataURL;
+        _0x31ec69.src = _0x2764ba;
       }
     });
-  } catch(e){}
+  } catch (_0x2ec687) {}
 }
 
 function listenToBoardItems() {
-  const listContainer = document.getElementById('board-word-list');
+  const _0x2289c8 = document.getElementById(_0x4b6c('0x36'));
   try {
-    db.ref('board/items').on('value', (snapshot) => {
-      if (!listContainer) return;
-      listContainer.innerHTML = '';
-      const items = snapshot.val();
-      if (items) {
-        Object.keys(items).forEach((key) => {
-          addItemToBoardDOM(items[key]);
+    db.ref(_0x4b6c('0x39'))[_0x4b6c('0xbc')](_0x4b6c('0x17'), (_0x3e185e) => {
+      if (!_0x2289c8) return;
+      _0x2289c8[_0x4b6c('0x37')] = '';
+      const _0x48bb74 = _0x3e185e[_0x4b6c('0xa3')]();
+      if (_0x48bb74) {
+        Object.keys(_0x48bb74).forEach((_0x4c208c) => {
+          addItemToBoardDOM(_0x48bb74[_0x4c208c]);
         });
       }
     });
-  } catch(e){}
+  } catch (_0x217d83) {}
 }
 
 function listenToChat() {
-  const chatMessages = document.getElementById('chatMessages');
+  const _0x56a684 = document.getElementById(_0x4b6c('0x4f'));
   try {
-    db.ref('chat/messages').on('value', (snapshot) => {
-      if (!chatMessages) return;
-      chatMessages.innerHTML = '';
-      const messages = snapshot.val();
-      if (messages) {
-        Object.keys(messages).forEach((key) => {
-          addChatMessageToDOM(messages[key], key);
+    db.ref(_0x4b6c('0x4e'))[_0x4b6c('0xbc')](_0x4b6c('0x17'), (_0x5c7e1e) => {
+      if (!_0x56a684) return;
+      _0x56a684[_0x4b6c('0x37')] = '';
+      const _0x1bd040 = _0x5c7e1e[_0x4b6c('0xa3')]();
+      if (_0x1bd040) {
+        Object.keys(_0x1bd040).forEach((_0x2a3e6a) => {
+          addChatMessageToDOM(_0x1bd040[_0x2a3e6a], _0x2a3e6a);
         });
       }
     });
-  } catch(e){}
+  } catch (_0x4fae6f) {}
 }
 
-// ==========================================
-// ==========================================
-
 function initPeerJS() {
-  const myPeerId = (currentRole === 'teacher') ? 'board-teacher-main-id' : undefined;
-
-  
-  const peerConfig = {
+  const _0x26ffbf = (currentRole === _0x4b6c('0x42')) ? _0x4b6c('0xca') : undefined;
+  const _0x50d750 = {
     config: {
       iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' }
+        { urls: _0x4b6c('0xcb') },
+        { urls: _0x4b6c('0xcc') },
+        { urls: _0x4b6c('0xcd') }
       ]
     }
   };
-
-  peer = new Peer(myPeerId, peerConfig);
-
-  peer.on('open', (id) => {
-    console.log('Мой Peer ID:', id);
-    const placeholder = document.getElementById('videoPlaceholder');
-    if (placeholder) {
-      placeholder.innerText = (currentRole === 'teacher') 
-        ? 'Ожидание подключения...' 
-        : 'Нажмите «Вызов» для связи';
+  peer = new Peer(_0x26ffbf, _0x50d750);
+  peer[_0x4b6c('0xd')](_0x4b6c('0xcf'), (_0x1d58d9) => {
+    const _0x181a44 = document.getElementById(_0x4b6c('0xd0'));
+    if (_0x181a44) {
+      _0x181a44[_0x4b6c('0x8f')] = (currentRole === _0x4b6c('0x42')) ? _0x4b6c('0xd1') : _0x4b6c('0xd2');
     }
   });
-
-  
-  peer.on('call', (call) => {
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then((stream) => {
-        localStream = stream;
-        const localVideo = document.getElementById('localVideo');
-        if (localVideo) localVideo.srcObject = stream;
-
-        call.answer(stream);
-        handleCallStream(call);
-      })
-      .catch((err) => {
-        console.error("Ошибка доступа к камере/микрофону:", err);
-        alert("Не удалось получить доступ к камере или микрофону!");
-      });
+  peer[_0x4b6c('0xd')](_0x4b6c('0xd3'), (_0x56a4eb) => {
+    navigator.mediaDevices[_0x4b6c('0xd4')]({ video: true, audio: true }).then((_0x5dc3b1) => {
+      localStream = _0x5dc3b1;
+      const _0x39a3f2 = document.getElementById(_0x4b6c('0xd6'));
+      if (_0x39a3f2) _0x39a3f2[_0x4b6c('0xd7')] = _0x5dc3b1;
+      _0x56a4eb[_0x4b6c('0xd8')](_0x5dc3b1);
+      handleCallStream(_0x56a4eb);
+    })['catch']((_0x1b4020) => {
+      alert("Не удалось получить доступ к камере или микрофону!");
+    });
   });
-
-  peer.on('error', (err) => {
-    console.error("PeerJS ошибка:", err);
-  });
+  peer[_0x4b6c('0xd')](_0x4b6c('0xda'), (_0x16b0d9) => {});
 }
 
 function startCall() {
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-    .then((stream) => {
-      localStream = stream;
-      const localVideo = document.getElementById('localVideo');
-      if (localVideo) localVideo.srcObject = stream;
-
-      const targetId = (currentRole === 'teacher') ? prompt("Введите Peer ID ученика:") : 'board-teacher-main-id';
-      
-      if (!targetId) return;
-
-      const call = peer.call(targetId, stream);
-      handleCallStream(call);
-    })
-    .catch((err) => {
-      console.error("Ошибка при вызове:", err);
-      alert("Включите разрешения для камеры и микрофона в браузере!");
-    });
+  navigator.mediaDevices[_0x4b6c('0xd4')]({ video: true, audio: true }).then((_0x559e3d) => {
+    localStream = _0x559e3d;
+    const _0x3e18a2 = document.getElementById(_0x4b6c('0xd6'));
+    if (_0x3e18a2) _0x3e18a2[_0x4b6c('0xd7')] = _0x559e3d;
+    const _0x27cb5e = (currentRole === _0x4b6c('0x42')) ? prompt(_0x4b6c('0xdb')) : _0x4b6c('0xca');
+    if (!_0x27cb5e) return;
+    const _0x4b6845 = peer[_0x4b6c('0xd3')](_0x27cb5e, _0x559e3d);
+    handleCallStream(_0x4b6845);
+  })['catch']((_0x1a8f92) => {
+    alert("Включите разрешения для камеры и микрофона в браузере!");
+  });
 }
 
-function handleCallStream(call) {
-  currentCall = call;
-  call.on('stream', (remoteStream) => {
-    const remoteVideo = document.getElementById('remoteVideo');
-    if (remoteVideo) remoteVideo.srcObject = remoteStream;
-    
-    const placeholder = document.getElementById('videoPlaceholder');
-    if (placeholder) placeholder.style.display = 'none';
+function handleCallStream(_0x50c33a) {
+  currentCall = _0x50c33a;
+  _0x50c33a[_0x4b6c('0xd')](_0x4b6c('0xdd'), (_0x4299b0) => {
+    const _0x12c8b0 = document.getElementById(_0x4b6c('0xdc'));
+    if (_0x12c8b0) _0x12c8b0[_0x4b6c('0xd7')] = _0x4299b0;
+    const _0x5821c4 = document.getElementById(_0x4b6c('0xd0'));
+    if (_0x5821c4) _0x5821c4[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x62');
   });
-
-  call.on('close', () => {
-    const placeholder = document.getElementById('videoPlaceholder');
-    if (placeholder) {
-      placeholder.style.display = 'block';
-      placeholder.innerText = 'Связь завершена';
+  _0x50c33a[_0x4b6c('0xd')](_0x4b6c('0xde'), () => {
+    const _0x1536b1 = document.getElementById(_0x4b6c('0xd0'));
+    if (_0x1536b1) {
+      _0x1536b1[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x9d');
+      _0x1536b1[_0x4b6c('0x8f')] = _0x4b6c('0xdf');
     }
   });
 }
 
 function toggleAudio() {
   if (!localStream) return;
-  const audioTrack = localStream.getAudioTracks()[0];
-  if (audioTrack) {
+  const _0x498528 = localStream[_0x4b6c('0xe0')]()[0];
+  if (_0x498528) {
     isAudioMuted = !isAudioMuted;
-    audioTrack.enabled = !isAudioMuted;
-    const btn = document.getElementById('toggleAudioBtn');
-    if (btn) {
-      btn.innerText = isAudioMuted ? '🎙️ Выкл. звук' : '🎙️ Вкл. звук';
-      btn.classList.toggle('btn-off', isAudioMuted);
+    _0x498528.enabled = !isAudioMuted;
+    const _0x53e414 = document.getElementById(_0x4b6c('0xe1'));
+    if (_0x53e414) {
+      _0x53e414[_0x4b6c('0x8f')] = isAudioMuted ? _0x4b6c('0xe2') : _0x4b6c('0xe3');
+      _0x53e414[_0x4b6c('0xe6')][_0x4b6c('0xe7')](_0x4b6c('0xe4'), isAudioMuted);
     }
   }
 }
 
 function toggleVideo() {
   if (!localStream) return;
-  const videoTrack = localStream.getVideoTracks()[0];
-  if (videoTrack) {
+  const _0x1525a1 = localStream[_0x4b6c('0xe8')]()[0];
+  if (_0x1525a1) {
     isVideoMuted = !isVideoMuted;
-    videoTrack.enabled = !isVideoMuted;
-    const btn = document.getElementById('toggleVideoBtn');
-    if (btn) {
-      btn.innerText = isVideoMuted ? '📷 Выкл. видео' : '📷 Вкл. видео';
-      btn.classList.toggle('btn-off', isVideoMuted);
+    _0x1525a1.enabled = !isVideoMuted;
+    const _0x44d326 = document.getElementById(_0x4b6c('0xe9'));
+    if (_0x44d326) {
+      _0x44d326[_0x4b6c('0x8f')] = isVideoMuted ? _0x4b6c('0xea') : _0x4b6c('0xeb');
+      _0x44d326[_0x4b6c('0xe6')][_0x4b6c('0xe7')](_0x4b6c('0xe4'), isVideoMuted);
     }
   }
 }
 
-
 function initVideoBoxDrag() {
-  const videoBox = document.getElementById('video-conference-box');
-  const videoHeader = document.getElementById('videoHeader');
-
-  if (videoBox && videoHeader) {
-    let isDragging = false;
-    let startX, startY, initialLeft, initialTop;
-
-    const startDrag = (e) => {
-      isDragging = true;
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      
-      const rect = videoBox.getBoundingClientRect();
-      startX = clientX;
-      startY = clientY;
-      initialLeft = rect.left;
-      initialTop = rect.top;
+  const _0x256e39 = document.getElementById(_0x4b6c('0xec'));
+  const _0x1e3674 = document.getElementById(_0x4b6c('0xed'));
+  if (_0x256e39 && _0x1e3674) {
+    let _0x59905c = false, _0x4be1ee, _0x1b1bdf, _0x3b8908, _0x375e81;
+    const _0x2764ba = (_0x31ec69) => {
+      _0x59905c = true;
+      const _0x2ec687 = _0x31ec69[_0x4b6c('0x2e')] ? _0x31ec69[_0x4b6c('0x2e')][0][_0x4b6c('0x2f')] : _0x31ec69[_0x4b6c('0x2f')];
+      const _0x2289c8 = _0x31ec69[_0x4b6c('0x2e')] ? _0x31ec69[_0x4b6c('0x2e')][0][_0x4b6c('0x30')] : _0x31ec69[_0x4b6c('0x30')];
+      const _0x3e185e = _0x256e39[_0x4b6c('0x2b')]();
+      _0x4be1ee = _0x2ec687;
+      _0x1b1bdf = _0x2289c8;
+      _0x3b8908 = _0x3e185e[_0x4b6c('0x2c')];
+      _0x375e81 = _0x3e185e[_0x4b6c('0x2d')];
     };
-
-    const doDrag = (e) => {
-      if (!isDragging) return;
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-      const deltaX = clientX - startX;
-      const deltaY = clientY - startY;
-
-      videoBox.style.left = `${initialLeft + deltaX}px`;
-      videoBox.style.top = `${initialTop + deltaY}px`;
-      videoBox.style.bottom = 'auto';
-      videoBox.style.right = 'auto';
+    const _0x48bb74 = (_0x4c208c) => {
+      if (!_0x59905c) return;
+      const _0x217d83 = _0x4c208c[_0x4b6c('0x2e')] ? _0x4c208c[_0x4b6c('0x2e')][0][_0x4b6c('0x2f')] : _0x4c208c[_0x4b6c('0x2f')];
+      const _0x56a684 = _0x4c208c[_0x4b6c('0x2e')] ? _0x4c208c[_0x4b6c('0x2e')][0][_0x4b6c('0x30')] : _0x4c208c[_0x4b6c('0x30')];
+      const _0x5c7e1e = _0x217d83 - _0x4be1ee;
+      const _0x1bd040 = _0x56a684 - _0x1b1bdf;
+      _0x256e39[_0x4b6c('0x43')][_0x4b6c('0x2c')] = `${_0x3b8908 + _0x5c7e1e}px`;
+      _0x256e39[_0x4b6c('0x43')][_0x4b6c('0x2d')] = `${_0x375e81 + _0x1bd040}px`;
+      _0x256e39[_0x4b6c('0x43')]['bottom'] = _0x4b6c('0xee');
+      _0x256e39[_0x4b6c('0x43')]['right'] = _0x4b6c('0xee');
     };
-
-    const stopDrag = () => { isDragging = false; };
-
-    videoHeader.addEventListener('mousedown', startDrag);
-    document.addEventListener('mousemove', doDrag);
-    document.addEventListener('mouseup', stopDrag);
-
-    videoHeader.addEventListener('touchstart', startDrag, { passive: true });
-    document.addEventListener('touchmove', doDrag, { passive: true });
-    document.addEventListener('touchend', stopDrag);
+    const _0x2a3e6a = () => { _0x59905c = false; };
+    _0x1e3674[_0x4b6c('0xd')](_0x4b6c('0xe'), _0x2764ba);
+    document[_0x4b6c('0xd')](_0x4b6c('0xf'), _0x48bb74);
+    document[_0x4b6c('0xd')](_0x4b6c('0x10'), _0x2a3e6a);
+    _0x1e3674[_0x4b6c('0xd')](_0x4b6c('0x12'), _0x2764ba, { passive: true });
+    document[_0x4b6c('0xd')](_0x4b6c('0x13'), _0x48bb74, { passive: true });
+    document[_0x4b6c('0xd')](_0x4b6c('0x14'), _0x2a3e6a);
   }
 }
 
-
-function openPdfModal(fileUrl, fileName) {
-  const modal = document.getElementById('pdf-modal');
-  const iframe = document.getElementById('pdf-modal-iframe');
-  const title = document.getElementById('pdf-modal-title');
-  
-  if (modal && iframe) {
-    iframe.src = fileUrl;
-    if (title) title.innerText = fileName || 'Просмотр документа';
-    modal.style.display = 'flex';
+function openPdfModal(_0x4fae6f, _0x26ffbf) {
+  const _0x50d750 = document.getElementById(_0x4b6c('0xef'));
+  const _0x1d58d9 = document.getElementById(_0x4b6c('0xf0'));
+  const _0x181a44 = document.getElementById(_0x4b6c('0xf1'));
+  if (_0x50d750 && _0x1d58d9) {
+    _0x1d58d9[_0x4b6c('0x7f')] = _0x4fae6f;
+    if (_0x181a44) _0x181a44[_0x4b6c('0x8f')] = _0x26ffbf || _0x4b6c('0xf2');
+    _0x50d750[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x5c');
   }
 }
 
 function closePdfModal() {
-  const modal = document.getElementById('pdf-modal');
-  const iframe = document.getElementById('pdf-modal-iframe');
-  
-  if (modal) modal.style.display = 'none';
-  if (iframe) iframe.src = ''; // Очищаем iframe, чтобы документ не висел в памяти
+  const _0x56a4eb = document.getElementById(_0x4b6c('0xef'));
+  const _0x5dc3b1 = document.getElementById(_0x4b6c('0xf0'));
+  if (_0x56a4eb) _0x56a4eb[_0x4b6c('0x43')][_0x4b6c('0x72')] = _0x4b6c('0x62');
+  if (_0x5dc3b1) _0x5dc3b1[_0x4b6c('0x7f')] = '';
 }
-  
