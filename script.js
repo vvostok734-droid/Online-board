@@ -257,10 +257,10 @@ function handleChatFileUpload(e) {
     alert("Ошибка при чтении файла");
   };
 
-  // Читаем файл как DataURL (Base64)
+  
   reader.readAsDataURL(file);
   
-  // Сбрасываем input, чтобы можно было выбрать тот же файл повторно
+  
   e.target.value = '';
 }
 
@@ -302,7 +302,7 @@ function addChatMessageToDOM(msg, msgId = null) {
   
   html += `</div>`;
   
-  // 1. Отображение картинок
+  
   if (msg.isImage && msg.fileUrl) {
     html += `
       <div style="margin-top:6px;">
@@ -310,7 +310,7 @@ function addChatMessageToDOM(msg, msgId = null) {
         <a href="${msg.fileUrl}" download="${msg.fileName || 'image.jpg'}" style="display:inline-block; font-size:12px; color:#a6e3a1; text-decoration:underline;">📥 Скачать картинку</a>
       </div>`;
   } 
-  // 2. Отображение файлов (включая PDF)
+   
   else if (msg.isFile && msg.fileUrl) {
     const isPdf = msg.fileName && msg.fileName.toLowerCase().endsWith('.pdf');
     
@@ -348,7 +348,7 @@ function deleteChatMessage(msgId) {
   }
 }
 
-// Ввод текста на доску
+
 function showBigTextModal() {
   const modal = document.getElementById('text-modal');
   if (modal) {
@@ -396,10 +396,11 @@ function addItemToBoardDOM(item) {
     img.style.objectFit = 'contain';
     img.style.borderRadius = '8px';
     img.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-    img.style.pointerEvents = 'none'; // Чтобы мышь не перехватывалась самой картинкой
+    img.style.pointerEvents = 'none'; 
+    
     elem.appendChild(img);
     
-    // Начальные размеры для картинки
+    
     elem.style.width = item.width ? item.width + 'px' : '220px';
     if (item.height) elem.style.height = item.height + 'px';
   } else {
@@ -414,26 +415,28 @@ function addItemToBoardDOM(item) {
     elem.style.whiteSpace = 'pre-wrap';
   }
 
-  // Создаем ручку (маркер) для растягивания
+  
   const handle = document.createElement('div');
   handle.className = 'resize-handle';
   elem.appendChild(handle);
 
   listContainer.appendChild(elem);
 
-  // Подключаем перетаскивание и изменение размера (Мышь + Touch)
+
   makeElementInteractive(elem, handle, item);
 }
 
-// Функция интерактивности: перемещение и масштабирование
+
 function makeElementInteractive(elem, handle, item) {
   let isDragging = false;
   let isResizing = false;
   let startX, startY, startWidth, startHeight, startLeft, startTop;
 
-  // --- 1. ПЕРЕМЕЩЕНИЕ (Drag) ---
+  // -
   const onDragStart = (e) => {
-    if (e.target === handle) return; // Если кликнули по маркеру — не перетаскиваем
+    if (e.target === handle) return; 
+    
+    
     isDragging = true;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -454,7 +457,7 @@ function makeElementInteractive(elem, handle, item) {
   const onDragEnd = () => {
     if (isDragging) {
       isDragging = false;
-      // Если есть Firebase — сохраняем новые координаты
+      
       if (db && item.id) {
         db.ref(`board/items/${item.id}`).update({
           x: parseInt(elem.style.left),
@@ -464,7 +467,7 @@ function makeElementInteractive(elem, handle, item) {
     }
   };
 
-  // --- 2. ИЗМЕНЕНИЕ РАЗМЕРА (Resize) ---
+  // --
   const onResizeStart = (e) => {
     e.stopPropagation(); // Отменяем всплытие, чтобы не срабатывал drag
     isResizing = true;
@@ -502,7 +505,7 @@ function makeElementInteractive(elem, handle, item) {
     }
   };
 
-  // События для перетаскивания (Элемент)
+  
   elem.addEventListener('mousedown', onDragStart);
   window.addEventListener('mousemove', onDragMove);
   window.addEventListener('mouseup', onDragEnd);
@@ -521,7 +524,7 @@ function makeElementInteractive(elem, handle, item) {
   window.addEventListener('touchend', onResizeEnd);
 }
 
-// Быстрое сжатие изображений
+//
 function compressImage(src, maxWidth, quality, callback) {
   const img = new Image();
   img.onload = () => {
@@ -540,7 +543,7 @@ function compressImage(src, maxWidth, quality, callback) {
 }
 
 // ==========================================
-// --- ВХОД, РОЛИ И АВТОРИЗАЦИЯ УЧЕНИКОВ ---
+// 
 // ==========================================
 
 function loginWithPin() {
@@ -561,7 +564,7 @@ function loginWithPin() {
     return;
   }
 
-  // Проверка подключения базы
+  
   if (!db || firebaseConfig.databaseURL.includes('YOUR_DATABASE_NAME')) {
     if (errorElement) {
       errorElement.style.display = 'block';
@@ -570,7 +573,7 @@ function loginWithPin() {
     return;
   }
 
-  // 1. Сначала ищем PIN в списке учителей Firebase
+  
   db.ref('teachers').once('value').then((teacherSnapshot) => {
     const teachers = teacherSnapshot.val();
     let isTeacher = false;
@@ -594,7 +597,7 @@ function loginWithPin() {
       return;
     }
 
-    // 2. Если не учитель — ищем среди учеников
+    
     return db.ref('students').once('value').then((studentSnapshot) => {
       const students = studentSnapshot.val();
       let foundStudent = null;
@@ -764,7 +767,7 @@ function deleteStudent(studentId, name) {
 }
 
 // ==========================================
-// --- СЛУШАТЕЛИ FIREBASE ---
+// 
 // ==========================================
 
 function listenToCanvas() {
@@ -816,13 +819,12 @@ function listenToChat() {
 }
 
 // ==========================================
-// --- WEBRTC И PEERJS (ВИДЕОСВЯЗЬ) ---
 // ==========================================
 
 function initPeerJS() {
   const myPeerId = (currentRole === 'teacher') ? 'board-teacher-main-id' : undefined;
 
-  // Конфигурация ICE-серверов (STUN / TURN)
+  
   const peerConfig = {
     config: {
       iceServers: [
@@ -845,7 +847,7 @@ function initPeerJS() {
     }
   });
 
-  // Входящий звонок
+  
   peer.on('call', (call) => {
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       .then((stream) => {
@@ -934,7 +936,7 @@ function toggleVideo() {
   }
 }
 
-// Перетаскивание видео-блока (Мышь + Touch)
+
 function initVideoBoxDrag() {
   const videoBox = document.getElementById('video-conference-box');
   const videoHeader = document.getElementById('videoHeader');
@@ -981,7 +983,7 @@ function initVideoBoxDrag() {
   }
 }
 
-// --- ФУНКЦИИ ДЛЯ МОДАЛЬНОГО ОКНА PDF ---
+
 function openPdfModal(fileUrl, fileName) {
   const modal = document.getElementById('pdf-modal');
   const iframe = document.getElementById('pdf-modal-iframe');
