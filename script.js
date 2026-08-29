@@ -19,6 +19,7 @@ let canvas, ctx;
 let isDrawing = false;
 let currentRole = 'student';
 let currentUserName = 'Ученик';
+let currentStudentId = null;
 let currentColor = '#000000';
 let currentLineWidth = 4;
 let isEraser = false;
@@ -380,69 +381,92 @@ function confirmBigText() {
 function addItemToBoardDOM(item) {
   let listContainer = document.getElementById('board-word-list');
   if (!listContainer) return;
-  
-  const elem = document.createElement('div');
-  elem.className = 'board-item';
-  elem.style.position = 'absolute';
-  elem.style.left = (item.x || 50) + 'px';
-  elem.style.top = (item.y || 50) + 'px';
-  elem.style.zIndex = '50';
 
-  if (item.type === 'image') {
-    const img = document.createElement('img');
-    img.src = item.content;
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'contain';
-    img.style.borderRadius = '8px';
-    img.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-    img.style.pointerEvents = 'none'; 
-    
-    elem.appendChild(img);
-    
-    
-    elem.style.width = item.width ? item.width + 'px' : '220px';
-    if (item.height) elem.style.height = item.height + 'px';
-  } else {
-    elem.innerText = item.content;
-    elem.style.background = '#89b4fa';
-    elem.style.color = '#11111b';
-    elem.style.padding = '10px 16px';
-    elem.style.borderRadius = '8px';
-    elem.style.fontWeight = 'bold';
-    elem.style.fontSize = '18px';
-    elem.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
-    elem.style.whiteSpace = 'pre-wrap';
+  let elem = item.id ? document.getElementById(`board-item-${item.id}`) : null;
+
+  if (!elem) {
+    elem = document.createElement('div');
+    if (item.id) elem.id = `board-item-${item.id}`;
+    elem.className = 'board-item';
+    elem.style.position = 'absolute';
+
+    if (item.type === 'image') {
+      const img = document.createElement('img');
+      img.src = item.content;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'contain';
+      img.style.borderRadius = '8px';
+      img.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+      img.style.pointerEvents = 'none'; 
+      elem.appendChild(img);
+    } else {
+      elem.innerText = item.content;
+      elem.style.background = '#89b4fa';
+      elem.style.color = '#11111b';
+      elem.style.padding = '10px 16px';
+      elem.style.borderRadius = '8px';
+      elem.style.fontWeight = 'bold';
+      elem.style.fontSize = '18px';
+      elem.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+      elem.style.whiteSpace = 'pre-wrap';
+    }
+
+    const handle = document.createElement('div');
+    handle.className = 'resize-handle';
+    elem.appendChild(handle);
+
+    listContainer.appendChild(elem);
+    makeElementInteractive(elem, handle, item);
   }
 
-  
-  const handle = document.createElement('div');
-  handle.className = 'resize-handle';
-  elem.appendChild(handle);
+  // Защита: Если этот элемент прямо сейчас тащит текущий пользователь — не перебиваем его позицию из базы!
+  if (elem.dataset.isBusy === "true") return;
 
-  listContainer.appendChild(elem);
+  elem.style.left = (item.x || 50) + 'px';
+  elem.style.top = (item.y || 50) + 'px';
+  elem.style.zIndex = item.zIndex || 50;
 
+  if (item.width) elem.style.width = item.width + 'px';
+  else if (item.type === 'image') elem.style.width = '220px';
 
-  makeElementInteractive(elem, handle, item);
+  if (item.height) elem.style.height = item.height + 'px';
 }
 
 
 function makeElementInteractive(elem, handle, item) {
   let isDragging = false;
   let isResizing = false;
-  let startX, startY, startWidth, startHeight, startLeft, startTop;
+  let startX, startY, startWidth, startHeight;
+  let lastSyncTime = 0; // Для ограничения частоты отправки (throttling)
 
-  // -
+  const syncToFirebase = (data) => {
+    const now = Date.now();
+    // Отправляем не чаще чем раз в 30 мс (около 30 кадров/сек)
+    if (now - lastSyncTime > 30 && db && item.id) {
+      lastSyncTime = now;
+      db.ref(`board/items/${item.id}`).update(data);
+    }
+  };
+
+  // --- Перетаскивание ---
   const onDragStart = (e) => {
     if (e.target === handle) return; 
     
-    
     isDragging = true;
+    elem.dataset.isBusy = "true"; // Помечаем, что мы захватили элемент
+
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
     startX = clientX - elem.offsetLeft;
     startY = clientY - elem.offsetTop;
+
+    const newZIndex = Date.now() % 100000;
+    elem.style.zIndex = newZIndex;
+    if (db && item.id) {
+      db.ref(`board/items/${item.id}`).update({ zIndex: newZIndex });
+    }
   };
 
   const onDragMove = (e) => {
@@ -450,14 +474,20 @@ function makeElementInteractive(elem, handle, item) {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-    elem.style.left = (clientX - startX) + 'px';
-    elem.style.top = (clientY - startY) + 'px';
+    const newLeft = clientX - startX;
+    const newTop = clientY - startY;
+
+    elem.style.left = newLeft + 'px';
+    elem.style.top = newTop + 'px';
+
+    syncToFirebase({ x: newLeft, y: newTop });
   };
 
   const onDragEnd = () => {
     if (isDragging) {
       isDragging = false;
-      
+      elem.dataset.isBusy = "false"; // Снимаем флаг захвата
+      // Финальное точное сохранение позиции в базе
       if (db && item.id) {
         db.ref(`board/items/${item.id}`).update({
           x: parseInt(elem.style.left),
@@ -467,10 +497,12 @@ function makeElementInteractive(elem, handle, item) {
     }
   };
 
-  // --
+  // --- Изменение размера ---
   const onResizeStart = (e) => {
-    e.stopPropagation(); // Отменяем всплытие, чтобы не срабатывал drag
+    e.stopPropagation();
     isResizing = true;
+    elem.dataset.isBusy = "true";
+
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
@@ -490,12 +522,14 @@ function makeElementInteractive(elem, handle, item) {
 
     elem.style.width = newWidth + 'px';
     elem.style.height = newHeight + 'px';
+
+    syncToFirebase({ width: newWidth, height: newHeight });
   };
 
   const onResizeEnd = () => {
     if (isResizing) {
       isResizing = false;
-      // Сохраняем размеры в Firebase
+      elem.dataset.isBusy = "false";
       if (db && item.id) {
         db.ref(`board/items/${item.id}`).update({
           width: parseInt(elem.style.width),
@@ -505,7 +539,6 @@ function makeElementInteractive(elem, handle, item) {
     }
   };
 
-  
   elem.addEventListener('mousedown', onDragStart);
   window.addEventListener('mousemove', onDragMove);
   window.addEventListener('mouseup', onDragEnd);
@@ -514,7 +547,6 @@ function makeElementInteractive(elem, handle, item) {
   window.addEventListener('touchmove', onDragMove, { passive: false });
   window.addEventListener('touchend', onDragEnd);
 
-  // События для изменения размера (Маркер)
   handle.addEventListener('mousedown', onResizeStart);
   window.addEventListener('mousemove', onResizeMove);
   window.addEventListener('mouseup', onResizeEnd);
@@ -564,7 +596,6 @@ function loginWithPin() {
     return;
   }
 
-  
   if (!db || firebaseConfig.databaseURL.includes('YOUR_DATABASE_NAME')) {
     if (errorElement) {
       errorElement.style.display = 'block';
@@ -573,7 +604,6 @@ function loginWithPin() {
     return;
   }
 
-  
   db.ref('teachers').once('value').then((teacherSnapshot) => {
     const teachers = teacherSnapshot.val();
     let isTeacher = false;
@@ -590,6 +620,7 @@ function loginWithPin() {
     if (isTeacher) {
       currentRole = 'teacher';
       currentUserName = 'Учитель';
+      currentStudentId = null;
       const teacherSec = document.getElementById('teacherSection');
       if (teacherSec) teacherSec.style.display = 'block';
       document.getElementById('auth-overlay').style.display = 'none';
@@ -597,16 +628,17 @@ function loginWithPin() {
       return;
     }
 
-    
     return db.ref('students').once('value').then((studentSnapshot) => {
       const students = studentSnapshot.val();
       let foundStudent = null;
+      let foundStudentId = null;
 
       if (students) {
         Object.keys(students).forEach((key) => {
           const studentPin = String(students[key].pin || '').trim();
           if (studentPin === pin) {
             foundStudent = students[key];
+            foundStudentId = key;
           }
         });
       }
@@ -614,10 +646,14 @@ function loginWithPin() {
       if (foundStudent) {
         currentRole = 'student';
         currentUserName = foundStudent.name || 'Ученик';
+        currentStudentId = foundStudentId; // Сохраняем ID ученика
+
         const teacherSec = document.getElementById('teacherSection');
         if (teacherSec) teacherSec.style.display = 'none';
         document.getElementById('auth-overlay').style.display = 'none';
+        
         initPeerJS();
+        listenToStudentRemoval(foundStudentId); // Включаем слежение за удалением
       } else {
         if (errorElement) {
           errorElement.style.display = 'block';
@@ -633,6 +669,36 @@ function loginWithPin() {
     }
   });
 }
+
+function listenToStudentRemoval(studentId) {
+  if (!db || !studentId) return;
+
+  const studentRef = db.ref(`students/${studentId}`);
+
+  // Слушаем изменения записи ученика
+  studentRef.on('value', (snapshot) => {
+    // Если snapshot.exists() === false, значит учитель удалил запись из Firebase
+    if (!snapshot.exists() && currentRole === 'student' && currentStudentId === studentId) {
+      // Отключаем слушатель
+      studentRef.off();
+      
+      // Закрываем видеозвонок, если он активен
+      if (currentCall) {
+        try { currentCall.close(); } catch (e) {}
+      }
+      if (peer) {
+        try { peer.destroy(); } catch (e) {}
+      }
+
+      alert('Ваш аккаунт был удален учителем.');
+      
+      // Сбрасываем переменные и выходим
+      currentStudentId = null;
+      logout();
+    }
+  });
+}
+
 
 function logout() {
   document.getElementById('auth-overlay').style.display = 'flex';
@@ -791,16 +857,33 @@ function listenToBoardItems() {
   try {
     db.ref('board/items').on('value', (snapshot) => {
       if (!listContainer) return;
-      listContainer.innerHTML = '';
       const items = snapshot.val();
-      if (items) {
-        Object.keys(items).forEach((key) => {
-          addItemToBoardDOM(items[key]);
-        });
+
+      if (!items) {
+        listContainer.innerHTML = '';
+        return;
       }
+
+      // Удаляем из DOM те элементы, которых больше нет в Firebase
+      const currentIds = Object.keys(items);
+      const domItems = listContainer.querySelectorAll('.board-item');
+      domItems.forEach((domElem) => {
+        const elemId = domElem.id.replace('board-item-', '');
+        if (!currentIds.includes(elemId)) {
+          domElem.remove();
+        }
+      });
+
+      // Добавляем или обновляем существующие элементы
+      Object.keys(items).forEach((key) => {
+        const itemData = items[key];
+        itemData.id = key;
+        addItemToBoardDOM(itemData);
+      });
     });
   } catch(e){}
 }
+
 
 function listenToChat() {
   const chatMessages = document.getElementById('chatMessages');
